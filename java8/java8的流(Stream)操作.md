@@ -1,5 +1,9 @@
 # java8的流(Stream)操作
 
+### 流(Stream)
+
+流(Stream)是java8引入的api，使用它可以替换大部分集合操作，重要的是，流相对集合来说更简洁易读、更灵活，性能也更好。
+
 ## 函数式接口与lambda表达式
 
 函数式接口(Functional Interface)就是一个有且仅有一个抽象方法，但是可以有多个非抽象方法的接口。
@@ -96,6 +100,8 @@ graph LR
 3-4-5,经过流操作以后通过收集器(collect方法)将流转换为集合(Collection)
 
 这些过程在后面的每个例子中都会经历一遍.
+
+
 
 ----
 
@@ -634,28 +640,271 @@ Collector会对元素应用一个转换函数(很多时候是不体现任何效�
 
 #### 归约和汇总
 
+广义的归约汇总,下面所有的收集器,都是一个可以用reducing工厂方法定义的归约过程的特殊情况.方便可读性.
+
+```java
+long howManyDishes = menu.stream().collect(Collectors.counting());
+long howManyDishes1 = menu.stream().count();
+
+System.out.println(howManyDishes + ":" + howManyDishes1);
+
+Comparator<Dish> dishComparator = Comparator.comparing(Dish::getCalories);
+Optional<Dish> max = menu.stream().collect(Collectors.maxBy(dishComparator));
+Optional<Dish> min = menu.stream().collect(Collectors.minBy(dishComparator));
+
+System.out.println("max:" + max);
+System.out.println("min:" + min);
+
+int sum = menu.stream().collect(Collectors.summingInt(Dish::getCalories));
+System.out.println("sum:" + sum);
+
+double avg = menu.stream().collect(Collectors.averagingInt(Dish::getCalories));
+System.out.println("avg:" + avg);
+// 可以通过一次summarizing操作获取,总和,平均值,最大,最小
+IntSummaryStatistics menuIss = menu.stream().collect(Collectors.summarizingInt(Dish::getCalories));
+System.out.println(menuIss);
+
+// 连接字符串
+String name1 = menu.stream().map(Dish::getName).collect(Collectors.joining());
+System.out.println(name1);
+String name2 = menu.stream().map(Dish::getName).collect(Collectors.joining(","));
+System.out.println(name2);
+```
+
+执行结果:
+
+9:9
+max:Optional[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}]
+min:Optional[Dish{name='season fruit', vegetarian=true, calories=120, type=OHTER}]
+sum:4200
+avg:466.6666666666667
+IntSummaryStatistics{count=9, sum=4200, min=120, average=466.666667, max=800}
+porkbeefchickenfrench friesriceseason fruitpizzaprawnasalmon
+pork,beef,chicken,french fries,rice,season fruit,pizza,prawna,salmon
 
 
-#### 可以通过一次summarizing操作获取,总和,平均值,最大,最小
 
-#### 连接字符串
+Collectors.reducing 需要3个参数:
 
+* 第一个参数是归约操作的起始值,也是流中没有元素时的返回值,所以很显然对于值和而言0是一个很合适的值
+* 第二个参数就是需要归约的值
+* 第三个参数将第一个参数和第二个参数累积成一个同类型值的操作.
 
+```java
+// 用reducing方法创建收集器计算菜单总热量
+int totalCalories = menu.stream().collect(Collectors.reducing(0, Dish::getCalories, (i, j) -> i + j));
+System.out.println("totalCalories:" + totalCalories);
+```
+
+执行结果:
+
+totalCalories:4200
+
+----
+
+**单参数reducing**工厂方法创建的收集器看做三参数方法的特殊情况,它把流中的第一个项目作为起点,把恒等函数(即一个合数仅仅是返回其输入参数)作为一个转换函数.这也意味着,要是把单参数reducing收集器传递给空流的collect方法,收集器就没有起点.
+
+```java
+// 单参数形式的reducing来找到热量最高的菜
+Optional<Dish> maxDish = menu.stream().collect(Collectors.reducing((d1, d2) -> d1.getCalories() > d2.getCalories() ? d1 : d2));
+System.out.println(maxDish);
+```
+
+执行结果:
+
+Optional[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}]
+
+----
+
+根据实际情况选择最佳解决方案:
+
+* 函数式编程通常提供了多种方法来执行同一个操作.收集器在某种程度上比Stream接口上直接提供的方法用起来更复杂,但是好处在于它们能提供更高水平的抽象和概括,也更容易重用和自定义.
+* 尽可能的给手头的问题探索不同的解决方案,但在通用方案里面,始终选择最专门化的一个,无论从可读性还是性能上看着一般都是最好的决定.
+
+使用前面提到的**reduce()**也可以实现和收集器一样的结果.
+
+```java
+// 使用Integer::sum获得总热量
+totalCalories = menu.stream().collect(Collectors.reducing(0, Dish::getCalories, Integer::sum));
+System.out.println("使用Integer::sum获得总热量totalCalories:" + totalCalories);
+
+// 不使用收集器获得总热量
+totalCalories = menu.stream().map(Dish::getCalories).reduce(Integer::sum).get();
+// 注意reduce(Integer::sum) 返回的不是int而是Optional<Interger>,以便在空流的情况下安全的执行归约操作.
+System.out.println("不使用收集器获得总热量totalCalories:" + totalCalories);
+```
+
+执行结果:
+
+使用Integer::sum获得总热量totalCalories:4200
+不使用收集器获得总热量totalCalories:4200
 
 #### 分组
 
+```java
+Map<Type, List<Dish>> dishesByType = menu.stream().collect(Collectors.groupingBy(Dish::getType));
+System.out.println(dishesByType);
+```
 
+执行结果:
+
+{OHTER=[Dish{name='french fries', vegetarian=true, calories=530, type=OHTER}, Dish{name='rice', vegetarian=true, calories=350, type=OHTER}, Dish{name='season fruit', vegetarian=true, calories=120, type=OHTER}, Dish{name='pizza', vegetarian=true, calories=550, type=OHTER}], FISH=[Dish{name='prawna', vegetarian=false, calories=300, type=FISH}, Dish{name='salmon', vegetarian=false, calories=450, type=FISH}], MEAT=[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}, Dish{name='beef', vegetarian=false, calories=700, type=MEAT}, Dish{name='chicken', vegetarian=false, calories=400, type=MEAT}]}
+
+----
+
+传入分组逻辑,按照代码定义的热量等级分组:
+
+```java
+Map<String, List<Dish>> levelMap = menu.stream().collect(Collectors.groupingBy(dish -> {
+    if (dish.getCalories() <= 400) {
+        return "DIET";
+    } else if (dish.getCalories() <= 700) {
+        return "NOMAL";
+    } else {
+        return "FAT";
+    }
+}));
+System.out.println(levelMap);
+```
+
+执行结果:
+
+{DIET=[Dish{name='chicken', vegetarian=false, calories=400, type=MEAT}, Dish{name='rice', vegetarian=true, calories=350, type=OHTER}, Dish{name='season fruit', vegetarian=true, calories=120, type=OHTER}, Dish{name='prawna', vegetarian=false, calories=300, type=FISH}], NOMAL=[Dish{name='beef', vegetarian=false, calories=700, type=MEAT}, Dish{name='french fries', vegetarian=true, calories=530, type=OHTER}, Dish{name='pizza', vegetarian=true, calories=550, type=OHTER}, Dish{name='salmon', vegetarian=false, calories=450, type=FISH}], FAT=[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}]}
 
 #### 多级分组
 
+要实现多级分组,我们可以使用一个由双参数版本的Collector.groupingBy工厂方法创建的收集器,它除了普通的分类函数外,还可以接受collector类型的第二个参数.我们可以把一个内层groupingBy传递给外层groupingBy,并定义一个为流中项目分类的二级标准.
+
+```java
+Map<Type, Map<String, List<Dish>>> levelMap2 = menu.stream().collect(
+        Collectors.groupingBy(Dish::getType,
+                Collectors.groupingBy(dish -> {
+                            if (dish.getCalories() <= 400) {
+                                return "DIET";
+                            } else if (dish.getCalories() <= 700) {
+                                return "NOMAL";
+                            } else {
+                                return "FAT";
+                            }
+                        }
+                )
+        )
+);
+System.out.println(levelMap2);
+```
+
+执行结果:
+
+{OHTER={DIET=[Dish{name='rice', vegetarian=true, calories=350, type=OHTER}, Dish{name='season fruit', vegetarian=true, calories=120, type=OHTER}], NOMAL=[Dish{name='french fries', vegetarian=true, calories=530, type=OHTER}, Dish{name='pizza', vegetarian=true, calories=550, type=OHTER}]}, FISH={DIET=[Dish{name='prawna', vegetarian=false, calories=300, type=FISH}], NOMAL=[Dish{name='salmon', vegetarian=false, calories=450, type=FISH}]}, MEAT={DIET=[Dish{name='chicken', vegetarian=false, calories=400, type=MEAT}], NOMAL=[Dish{name='beef', vegetarian=false, calories=700, type=MEAT}], FAT=[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}]}}
+
+----
+
+传递给第一个groupingBy的第二个收集器可以是任何类型,而不一定是另一个groupingBy
+
+```java
+Map<Type, Long> typeCount = menu.stream().collect(Collectors.groupingBy(Dish::getType, Collectors.counting()));
+System.out.println(typeCount);
+
+Map<Type, Optional<Dish>> mostCaloricbyType = menu.stream().collect(Collectors.groupingBy(Dish::getType
+        , Collectors.maxBy(Comparator.comparingInt(Dish::getCalories))));
+System.out.println(mostCaloricbyType);
+```
+
+执行结果:
+
+{OHTER=4, FISH=2, MEAT=3}
+
+{OHTER=Optional[Dish{name='pizza', vegetarian=true, calories=550, type=OHTER}], FISH=Optional[Dish{name='salmon', vegetarian=false, calories=450, type=FISH}], MEAT=Optional[Dish{name='pork', vegetarian=false, calories=800, type=MEAT}]}
+
+----
+
+### 把收集结果转换成另一种类型
+
+ Collectors.collectingAndThen
+
+```
+				Map<Type, Dish> mostDishMap = menu.stream().collect(
+                Collectors.groupingBy(
+                        Dish::getType, Collectors.collectingAndThen(
+                                Collectors.maxBy(
+                                        Comparator.comparingInt(Dish::getCalories)
+                                ), Optional::get
+                        )
+                )
+        );
+        System.out.println(mostDishMap);
+```
+
+mapping方法接收2个参数:一个函数对流中的元素做变换,另一个则将变换的结果对象收集起来.目的是在累加之前对每个输入元素应用一个映射函数,这样就可以接受特定类型元素的收集器适应不同类型的对象.
+
+```
+Map<Type, Set<String>> setMap = menu.stream().collect(Collectors.groupingBy(
+        Dish::getType, Collectors.mapping(
+                dish -> {
+                    if (dish.getCalories() <= 400) {
+                        return "DIET";
+                    } else if (dish.getCalories() <= 700) {
+                        return "NOMAL";
+                    } else {
+                        return "FAT";
+                    }
+                }, Collectors.toSet()
+        )
+));
+
+System.out.println(setMap);
+```
+
+----
 
 
-#### 并行
+
+mapping方法可以选择指定的数据结构:
+
+```
+Map<Type, Set<String>> setMap2 = menu.stream().collect(Collectors.groupingBy(
+        Dish::getType, Collectors.mapping(
+                dish -> {
+                    if (dish.getCalories() <= 400) {
+                        return "DIET";
+                    } else if (dish.getCalories() <= 700) {
+                        return "NOMAL";
+                    } else {
+                        return "FAT";
+                    }
+                }, Collectors.toCollection(HashSet::new)  // 选择指定的数据结构.
+        )
+));
+System.out.println(setMap2);
+```
+
+
+
+
+
+#### 并行流
+
+#### 使用
+
+并行流就是把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。
+
+JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并行操作。Stream API 可以声明性地通过parallel() 与sequential() 在并行流与顺序流之间进行切换。其实JAVA8底层是使用JAVA7新加入的Fork/Join框架.
+
+![Fork/Join](../markdown/image/stream并行求值.png)
+
+
 
 
 
 ### 总结
 
-#### 意义
+集合操作的痛点
+
+- 动不动就要遍历数据，代码繁琐、可读性差、维护困难
+- 内存占用大，集合是装载全部数据到内存
+- 需要程序员自己实现并行处理，难度大、易出错
+- 使用集合时性能优化对程序员来说也是一个难点
+
+上述痛点Stream Api能够轻易帮我们解决。
 
 #### 帮助
