@@ -529,7 +529,7 @@ System.out.println(optionalInt.getAsInt());
 
 
 
-#### 数值范围流
+### 数值范围流
 
 Java8 引入了两个可以用于IntStream和LongStream的静态方法,帮助生成数值范围流:**range和rangeClosed**.这两个方法都是第一个参数接受起始值,第二个参数接受结束值.
 
@@ -643,7 +643,7 @@ awk_copy.log:16
 
 
 
-#### 小结
+### 小结
 
 - Stream API 可以表达复杂的数据处理查询.
 - 可以使用filter\distinct\skip和limit对流做筛选操作.
@@ -852,7 +852,7 @@ System.out.println(mostCaloricbyType);
 
 ----
 
-### 把收集结果转换成另一种类型
+#### 把收集结果转换成另一种类型
 
  Collectors.collectingAndThen
 
@@ -928,11 +928,13 @@ System.out.println(setMap2);
 
 ### 并行流
 
-#### 使用
-
 并行流就是把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。
 
 JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并行操作。Stream API 可以声明性地通过parallel() 与sequential() 在并行流与顺序流之间进行切换。但最后一次的parallel()或者sequential()调用才会影响整个流水线.其内部通过一个Boolean变量控制是否并行.
+
+
+
+#### Fork/Join框架
 
 其实JAVA8底层是使用JAVA7新加入的Fork/Join框架.
 
@@ -940,9 +942,23 @@ JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并�
 
 
 
+----
+
+#### Spliiterator可分迭代器
 
 
-### 总结
+
+------
+
+#### 小结
+
+
+
+
+
+----
+
+## 总结
 
 集合操作的痛点
 
@@ -953,4 +969,4 @@ JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并�
 
 上述痛点Stream Api能够轻易帮我们解决。
 
-#### 帮助
+#### 
