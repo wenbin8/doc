@@ -3,7 +3,7 @@
 ### Java8
 
 - [ ] Lambda表达式
-- [ ] 流操作(Stream)
+- [x] 流操作(Stream)
 
 ### 并发
 
