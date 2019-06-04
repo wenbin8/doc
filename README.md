@@ -1,20 +1,19 @@
-存一些笔记和文档
+一步一步建立起从分布式到服务化在到云原生的一套完整技术栈.
 
 ### Java8
 
 - [ ] Lambda表达式
 - [x] 流操作(Stream)
+- [ ] HashMap源码分析
 
 ### 并发
 
+- [ ] JMM内存模型
 - [ ] synchronize和volatile
-- [ ] juc(ReentrantLock)源码分析
+- [ ] AQS/CAS
+- [ ] ReentrantLock源码分析
 - [ ] ConcurrentHashMap源码分析
 - [ ] 线程池与fork/join
-
-### JDK
-
-- [ ] HashMap源码分析
 
 ### 常用设计模式
 
@@ -40,11 +39,10 @@
 
 ### JVM
 
-- [ ] JVM运行时数据区
+- [ ] JVM运行时数据区的内存管理机制
 - [ ] 垃圾收集算法与垃圾收集器
 - [ ] 类加载机制与编译优化
-- [ ] JMM内存模型
-- [ ] 性能优化及监控工具使用
+- [ ] 性能监控与故障处理
 
 ### 分布式
 
@@ -81,6 +79,22 @@
 - [ ] NIO框架Netty
 
 ### 微服务(Spring boot/Spring Cloud)
+
+#### Spring Boot
+
+- [ ] 自动配置\起步依赖\Actuator
+
+#### Spring Cloud
+
+- [ ] Eureka注册中心
+- [ ] Ribbon 负载均衡
+- [ ] Fegion 声明式服务调用
+- [ ] Hystrix 服务熔断降级方式
+- [ ] Zuul 实现微服务网关
+- [ ] Config 分布式统一配置中心
+- [ ] Sleuth 调用链路跟踪
+- [ ] BUS 消息总线
+- [ ] Spring Boot 与 Spring Cloud 整合
 
 ### 云原生
 
