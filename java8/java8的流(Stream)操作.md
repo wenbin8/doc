@@ -1085,3 +1085,5 @@ characteristics方法返回一个int,代表 Spliterator本身特性集的编码.
 上述痛点Stream Api能够轻易帮我们解决。
 
 #### 
+
+[java8的流(Stream)操作-github地址](https://github.com/wenbin8/doc/blob/master/java8/java8的流(Stream)操作.md)
