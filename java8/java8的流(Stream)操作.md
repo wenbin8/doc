@@ -12,7 +12,7 @@ Lambda 表达式和方法引用（实际上也可认为是Lambda表达式）上�
 
 [参考[Java 8 函数式接口]](https://www.runoob.com/java/java8-functional-interfaces.html)
 
-这里只是抛转引玉,本篇文章主要让讲解stream的使用.还有许多如,内循环\外循环, 中间操作\终端操作等基础知识并未涉及.建议大家外部补充相关知识.
+这里只是抛转引玉,本篇文章主要让讲解stream的使用.
 
 ------
 
@@ -938,13 +938,126 @@ JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并�
 
 其实JAVA8底层是使用JAVA7新加入的Fork/Join框架.
 
-![Fork/Join](../markdown/image/stream并行求值.png)
+![fork/join](assets/stream并行求值.png)
 
+```java
+/**
+ * RecursiveTask 有返回值
+ * @Auther: wenbin
+ * @Date: 2019/6/4 21:36
+ * @Description:
+ */
+public class ForkJoinSumCalulator extends RecursiveTask<Long>{
 
+    /**
+     * 要求和的数组
+     */
+    private final long[] numbers;
+    /**
+     * 子任务处理的数组的起始和终止位置
+     */
+    private final int start;
+    private final int end;
+
+    /**
+     * 不在将任务分解为子任务的数组大小
+     */
+    public static final long THRESHOLD = 10_000;
+
+    public ForkJoinSumCalulator(long[] numbers) {
+        this(numbers, 0, numbers.length);
+    }
+
+    public ForkJoinSumCalulator(long[] numbers, int start, int end) {
+        this.numbers = numbers;
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Long compute() {
+        // 当前任务负责计算的大小
+        int length = end - start;
+        if (length <= THRESHOLD) {
+            return computeSeequentially();
+        }
+
+        ForkJoinSumCalulator left =
+                new ForkJoinSumCalulator(numbers, start, start + length / 2);
+        // 将这个任务推送给线程池,启动线程去执行
+        left.fork();
+        ForkJoinSumCalulator right = new ForkJoinSumCalulator(numbers, start + length / 2, end);
+
+        // 当前线程同步执行
+        Long rightResult = right.compute();
+        // 阻塞等待该线程执行完成
+        Long leftResult = left.join();
+
+        return rightResult + leftResult;
+    }
+
+    private long computeSeequentially() {
+        long sum = 0;
+        for (int i = start; i < end; i++) {
+            sum += numbers[i];
+        }
+        return sum;
+    }
+
+    public static void main(String[] args) {
+        long[] numbers = LongStream.rangeClosed(1, 100000).toArray();
+        ForkJoinSumCalulator task = new ForkJoinSumCalulator(numbers);
+        long sum = new ForkJoinPool().invoke(task);
+        System.out.println(sum);
+
+    }
+}
+```
+
+输出结果:
+
+5000050000
+
+使用分支/合并框架应注意
+
+- new ForkJoinPool();无参数构造方法将使用Runtime.availableProcessors的返回值来决定线程池使用的线程数.它实际返回的是可用内核的数量,包括超线程生成的虚拟内核.
+- 对一个任务调用join方法会阻塞调用方,知道该任务做出结果.因此,需要注意在两个任务都开始后在调用该方法.否则每个子任务必须等待另一个完成才能开始.可能会比顺序执行更慢.
+- 对子任务调用fork方法可以把它排入ForkJoinPool.同时对左边和右边调用fork方法,没有一边调用compute,一边调用fork效率高.因为compute方法重用了当前线程.
+- 注意并行并不一定比顺序执行快.使用前最好的方式是测量.
 
 ----
 
-#### Spliiterator可分迭代器
+#### Spliterator可分迭代器
+
+Spliterator是java8中加入的另一个新接;这个名字代表"可分迭代器".和Iterator一样,Spliterator也用于遍历数据源中的元素,但是它是为了并行执行而设计的.java8已经为集合框架中包含的所有数据结构提供了一个默认的Spliterator实现.
+
+```java
+public interface Spliterator<T>  {
+	boolean tryAdvance(Consumer<? super T> action);
+	Spliterator<T> trySplit();
+	long estimateSize();
+	int characteristics();
+}
+```
+
+T是Spliterator遍历的元素类型.
+
+tryAdvance方法的行为类似于普通的Iterator,因为它会按顺序一个一个使用Spliterator中的元素,并且如果还有元素需要遍历它会返回true.
+
+trySplit方法是专为Spliterator接口设计的,因为它可以把一些元素划出去分给第二个Spliterator(由该方法返回),让他们两个并行处理
+
+estimateSize方法可以估计还剩下多少元素要遍历,即使不那么准确,能快速算出这个值可以使拆分的更均匀.
+
+characteristics方法返回一个int,代表 Spliterator本身特性集的编码.可以用这些特性来更好 的控制和优化Spliterator的使用 .
+
+- ORDERED int 型 值为16 既定的顺序，Spliterator保证拆分和遍历时是按照这一顺序。
+- DISTINCT int型 值为1 表示元素都不是重复的，对于每一对元素{ x, y}，{ !x.equals(y)}。例如，这适用于基于{@link Set}的Spliterator。
+- SORTED int型 值为4 表示元素顺序按照预定义的顺序，可以通过getComparator 获取排序器，若返回null ,则是按自然排序。
+- SIZED int型 值为64 表示在遍历分隔之前 estimateSize() 返回的值代表一个有限的大小，在没有修改结构源的情况下，代表了一个完整遍历时所遇到的元素数量的精确计数。
+- NONNULL init型 值为256 表示数据源保证元素不会为空
+- IMMUTABLE int 型 值为1024 表示在遍历的过程中不能添加、替换、删除元素
+- CONCURRENT int型 值为4096 表示元素可以被多个线程安全并发得修改而不需要外部的同步。
+- SUBSIZED int型 值为16384 表示trySplit()返回的结果都是SIZED和SUBSIZED
 
 
 
@@ -952,7 +1065,9 @@ JAVA8 中将并行进行了优化，我们可以很容易的对数据进行并�
 
 #### 小结
 
-
+- 内部迭代可以让我们很容易的并行处理一个流 ,而无需在代码中显式的使用和协调不同的线程.
+- 分支 /合并框架让 我们得以用递归的方式将可以并行的 任务拆分成更小的任务,在不同的线程上执行,然后将各个子任务 的结果合并起来 生成整体结果.
+- Spliterator定义了 并行流如何拆分它要遍历的数据.
 
 
 

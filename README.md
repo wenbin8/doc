@@ -9,11 +9,14 @@
 ### 并发
 
 - [ ] JMM内存模型
-- [ ] synchronize和volatile
-- [ ] AQS/CAS
+- [ ] synchronize
+- [ ] volatile
+- [ ] AQS
+- [ ] CAS
 - [ ] ReentrantLock源码分析
 - [ ] ConcurrentHashMap源码分析
-- [ ] 线程池与fork/join
+- [ ] 线程池
+- [ ] fork/join
 
 ### 常用设计模式
 
@@ -29,7 +32,7 @@
 
 ### 框架源码分析
 
-- [ ] Spring的IOC:定位\加载\注册
+- [ ] Spring的IOC源码分析:定位\加载\注册
 - [ ] MyBatis:一条查询语句的解析执行与结果返回
 
 ### 数据库
