@@ -18,14 +18,14 @@ Lambda 表达式和方法引用（实际上也可认为是Lambda表达式）上�
 
 
 
-### 流(Stream)
+## 流(Stream)
 
 流(Stream)是java8引入的api，使用它可以替换大部分集合操作，重要的是，流相对集合来说更简洁易读、更灵活，性能也更好。
 
 - 使用Colleection接口需要做迭代,如for-each.这称为外部迭代.Stream库使用内部迭代,只要给出函数说怎么做就行了.
 - 流操作有两类:中间操作和终端操作
-- filter和map等中间操作会返回一个流,并可以链接在一起.可以用它们来这只一条流水线,但并颁布会生成任何结果.
-- forEach和count等终端操作会返回一个非流的值,并处理流水线以返回结果.
+  - filter和map等中间操作会返回一个流,并可以链接在一起.可以用它们来这只一条流水线,但并颁布会生成任何结果.
+  - forEach和count等终端操作会返回一个非流的值,并处理流水线以返回结果.
 
 
 
@@ -677,6 +677,18 @@ Collector会对元素应用一个转换函数(很多时候是不体现任何效�
 广义的归约汇总,下面所有的收集器,都是一个可以用reducing工厂方法定义的归约过程的特殊情况.方便可读性.
 
 ```java
+/**
+* Collectors.reducing 需要3个参数:
+* 第一个参数是归约操作的起始值,也是流中没有元素时的返回值,所以很显然对于值
+* 和而言0是一个很合适的值
+* 第二个参数就是需要归约的值
+* 第三个参数将第一个参数和第二个参数累积成一个同类型值的操作.
+*/
+// 用reducing方法创建收集器计算菜单总热量
+int totalCalories = menu.stream().collect(
+  Collectors.reducing(0, Dish::getCalories, (i, j) -> i + j));
+System.out.println("totalCalories:" + totalCalories);
+
 long howManyDishes = menu.stream().collect(Collectors.counting());
 long howManyDishes1 = menu.stream().count();
 
@@ -694,6 +706,18 @@ System.out.println("sum:" + sum);
 
 double avg = menu.stream().collect(Collectors.averagingInt(Dish::getCalories));
 System.out.println("avg:" + avg);
+
+// 单参数形式的reducing来找到热量最高的菜
+Optional<Dish> maxDish = menu.stream().collect(
+  Collectors.reducing((d1, d2) -> d1.getCalories() > d2.getCalories() ? d1 : d2));
+System.out.println(maxDish);
+
+// 使用Integer::sum获得总热量
+totalCalories = menu.stream().collect(
+  Collectors.reducing(0, Dish::getCalories, Integer::sum));
+System.out.println("使用Integer::sum获得总热量totalCalories:" + totalCalories);
+
+
 // 可以通过一次summarizing操作获取,总和,平均值,最大,最小
 IntSummaryStatistics menuIss = menu.stream().collect(Collectors.summarizingInt(Dish::getCalories));
 System.out.println(menuIss);
