@@ -1,4 +1,4 @@
-# BIO,NIO,AIO总结
+# :BIO,NIO,AIO总结
 
 通过对Linux系统的网络IO模型映射到java的IO实现.从而解释为什么BIO是同步阻塞,NIO是同步非阻塞,AIO是异步.
 
@@ -69,6 +69,8 @@ I/O 复用有时又被称为 事件驱动 I/O, 它的最大优势在于，我们
 
 ![I/O复用](assets/i:O复用.jpg)
 
+![image-20190611211038174](assets/image-20190611211038174.png)
+
 总而言之，I/O 复用的优点就在于可以同时等待多个I/O事件；而缺点是会进行两次系统调用（一次 select(), 一次 read() ）。
 
 #### **信号驱动I/O模型:**
@@ -134,16 +136,715 @@ I/O 复用有时又被称为 事件驱动 I/O, 它的最大优势在于，我们
 
 ### BIO(同步阻塞)
 
+Client代码:
+
+```java
+package com.wenbin.bio2;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 06:10
+ * @Description:
+ */
+public class TimeClient {
+
+    public static void main(String[] args) {
+        int port = 8080;
+
+        try {
+            // 连接
+            Socket socket = new Socket("127.0.0.1", port);
+
+            // 从socket中获得输入流
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // 从socket中获得输出流
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+            // 把消息写入输出流
+            out.println("QUERY TIME ORDER");
+            System.out.println("Send order 2 server succeed.");
+            // 从输入流读取消息,因为都是英文不涉及enCode deCode
+            String resp = in.readLine();
+            System.out.println("Now is :" + resp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+Server代码:
+
+```
+package com.wenbin.bio2;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 05:55
+ * @Description:
+ */
+public class TimeServer {
+
+    public static void main(String[] args) {
+        int port = 8080;
+        try {
+            // 监听端口
+            ServerSocket serverSocket = new ServerSocket(port);
+            Socket socket = null;
+
+            while (true) {
+                // 没有连接接入的时候阻塞在这里等待连接.
+                socket = serverSocket.accept();
+                // 将连接交给线程处理
+                new Thread(new TimeServerHandler(socket)).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+TimeServerHandler代码:
+
+```java
+package com.wenbin.bio2;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Date;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 05:59
+ * @Description:
+ */
+public class TimeServerHandler implements Runnable {
+
+    private Socket socket;
+
+    public TimeServerHandler(Socket socket) {
+        this.socket = socket;
+    }
+
+    @Override
+    public void run() {
+        BufferedReader in = null;
+        PrintWriter out = null;
+
+        try {
+            // 从socket中获得输入流
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // 从socket中获得输出流
+            out = new PrintWriter(socket.getOutputStream(), true);
+
+            String currentTime = null;
+            String body = null;
+            while ((body = in.readLine()) != null) {
+                System.out.println("the time server receive order :" + body);
+
+                currentTime = "QUERY TIME ORDER".equalsIgnoreCase(body)
+                        ? new Date(System.currentTimeMillis()).toString() : "BAD ORDER";
+                // 将相应消息写到输出流中
+                out.println(currentTime);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                    in = null;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            if (out != null) {
+                out.close();
+                out = null;
+            }
+            if (this.socket != null) {
+                try {
+                    this.socket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                this.socket = null;
+            }
+        }
+    }
+}
+```
+
 ##### 线程池缓冲的同步阻塞
+
+这里只是将服务端接受到socket时候新建线程的代码改成了线程池实现所以只涉及服务端代码变更:
+
+Server代码:
+
+```java
+package com.wenbin.bio2.thread.pool;
+
+import com.wenbin.bio2.TimeServerHandler;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 05:55
+ * @Description:
+ */
+public class TimeServer {
+
+    public static void main(String[] args) {
+        int port = 8080;
+
+        try {
+            ServerSocket serverSocket = new ServerSocket(port);
+
+            Socket socket = null;
+            TimeServerHandlerExecutePool executor =
+                    new TimeServerHandlerExecutePool(50, 10000);
+
+            while (true) {
+                // 没有连接接入的时候阻塞在这里等待连接.
+                socket = serverSocket.accept();
+                executor.execute(new TimeServerHandler(socket));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+线程池代码:
+
+```
+package com.wenbin.bio2.thread.pool;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 06:21
+ * @Description:
+ */
+public class TimeServerHandlerExecutePool {
+
+    private ExecutorService executorService;
+
+    public TimeServerHandlerExecutePool(int maxPoolSize, int queueSizee) {
+        executorService = new ThreadPoolExecutor(
+                Runtime.getRuntime().availableProcessors()
+                , maxPoolSize, 120L, TimeUnit.SECONDS
+                , new ArrayBlockingQueue<Runnable>(queueSizee));
+    }
+
+    public void execute(Runnable task) {
+        executorService.execute(task);
+    }
+}
+```
 
 ### NIO(同步非阻塞)
 
+Client代码:
+
+```java
+package com.wenbin.nio.echo;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.util.Iterator;
+import java.util.Set;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 12:46
+ * @Description:
+ */
+public class EchoClient {
+    String host = "127.0.0.1";
+    int port = 8089;
+
+    private Selector selector;
+    private SocketChannel socketChannel;
+
+    private String msg;
+
+    private Charset utf8 = Charset.forName("UTF-8");
+
+    public EchoClient(String msg) {
+        this.msg = msg;
+        try {
+            // 打开多路复用器
+            selector = Selector.open();
+            // 打开soket通道
+            socketChannel = SocketChannel.open();
+            // 设置为非阻塞
+            socketChannel.configureBlocking(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void start() {
+        try {
+            // 如果连接成功注册读事件.并肩消息通过通道写出去
+            if (socketChannel.connect(new InetSocketAddress(host, port))) {
+                socketChannel.register(selector, SelectionKey.OP_READ);
+
+                byte[] bytes = msg.getBytes();
+                ByteBuffer writeBuf = ByteBuffer.allocate(bytes.length);
+                writeBuf.put(bytes);
+                writeBuf.flip();
+
+                socketChannel.write(writeBuf);
+            } else {
+                // 连接为成功注册连接时间,等待通知.
+                socketChannel.register(selector, SelectionKey.OP_CONNECT);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        boolean isClose = false;
+        while (!isClose) {
+            isClose = select(msg);
+        }
+    }
+
+    private boolean select(String msg) {
+        boolean rsp = false;
+        try {
+            // 没有事件会阻塞在这里
+            selector.select();
+            // 取出已经就绪的时间
+            Set<SelectionKey> keySet = selector.selectedKeys();
+
+            Iterator<SelectionKey> it = keySet.iterator();
+
+            while (it.hasNext()) {
+                SelectionKey key = it.next();
+                it.remove();
+
+                SocketChannel socketChannel = null;
+                // 处理连接成功事件
+                if (key.isConnectable()) {
+                    // 获取事件对应的通道
+                    socketChannel = (SocketChannel) key.channel();
+
+                    // 这边等待三次握手成功
+                    if (socketChannel.finishConnect()) {
+                        // 如果连接成功则注册读事件
+                        socketChannel.register(selector, SelectionKey.OP_READ);
+
+                        // 将消息写入缓冲
+                        byte[] bytes = msg.getBytes("UTF-8");
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
+                        byteBuffer.put(bytes);
+                        byteBuffer.flip();
+
+                        // 这里的byteBuffer为堆内存,也就是用户态,通道的write方法会将缓冲内的数据写入到内核态
+                        socketChannel.write(byteBuffer);
+                    }
+                }
+                // 处理读事件
+                if (key.isReadable()) {
+                    // 获取事件对应的通道
+                    socketChannel = (SocketChannel) key.channel();
+
+                    // 准备好接受信息的缓存
+                    ByteBuffer readBuf = ByteBuffer.allocate(1024);
+
+                    int readSize = socketChannel.read(readBuf);
+
+                    if (readSize > 0) {
+                        readBuf.flip();
+
+                        CharBuffer charBuffer = utf8.decode(readBuf);
+                        System.out.println("Client:" + charBuffer.toString());
+                        rsp = true;
+                    } else if (readSize < 0) {
+                        key.cancel();
+                        socketChannel.close();
+                    }
+                }
+            }
+            return rsp;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return rsp;
+    }
+
+    public static void main(String[] args) {
+        EchoClient echoClient = new EchoClient("我是要发送的信息");
+        echoClient.start();
+    }
+}
+```
+
+Server代码:
+
+```java
+package com.wenbin.nio.echo;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.util.Iterator;
+import java.util.Set;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 11:28
+ * @Description:
+ */
+public class EchoServer {
+
+    private int port = 8089;
+
+    private Selector selector = null;
+
+    private ServerSocketChannel serverSocketChannel = null;
+
+    private Charset utf8 = Charset.forName("UTF-8");
+
+    public EchoServer()  {
+        try {
+            selector = Selector.open();
+            serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.configureBlocking(false);
+            serverSocketChannel.socket().bind(new InetSocketAddress(port), 1024);
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void start() {
+        try {
+            selector.select();
+            Set<SelectionKey> keySet = selector.selectedKeys();
+            Iterator<SelectionKey> it = keySet.iterator();
+
+            while (it.hasNext()) {
+                SelectionKey key = it.next();
+                it.remove();
+
+                if (key.isAcceptable()) {
+                    System.out.println("接到连接");
+                    // 获得连接通道
+                    ServerSocketChannel serverSocketChannel = (ServerSocketChannel)key.channel();
+                    SocketChannel socketChannel = serverSocketChannel.accept();
+                    socketChannel.configureBlocking(false);
+
+                    int register = SelectionKey.OP_READ;
+//                    int register = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+                    socketChannel.register(selector, register);
+                    System.out.println("连接读注册成功");
+                }
+
+                if (key.isReadable()) {
+                    System.out.println("接到读事件");
+                    SocketChannel socketChannel = (SocketChannel) key.channel();
+
+                    ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+                    int readSize = socketChannel.read(readBuffer);
+
+                    if (readSize > 0) {
+                        readBuffer.flip();
+
+                        CharBuffer charBuffer = utf8.decode(readBuffer);
+
+                        System.out.println("收到消息:" + charBuffer.toString());
+
+                        // 将回写消息放入附件
+                        readBuffer.flip();
+
+                        // 这种直接通过通道写回去
+                        socketChannel.write(readBuffer);
+                        /**
+                         * 这里可以直接写回去.那还要写事件有什么用?
+                         * 写事件何时触发?
+                         *
+                         * 写就绪相对有一点特殊，一般来说，你不应该注册写事件。写操作的就绪条件为底层缓冲区有空闲空间，
+                         * 而写缓冲区绝大部分时间都是有空闲空间的，所以当你注册写事件后，写操作一直是就绪的，选择处理
+                         * 线程全占用整个CPU资源。所以，只有当你确实有数据要写时再注册写操作，并在写完以后马上取消注册。
+                         */
+                        System.out.println("读事件处理成功");
+                    } else if (readSize < 0) {
+                        // 读取到小于0对方链路关闭
+                        key.cancel();
+                        socketChannel.close();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void main(String[] args) {
+        EchoServer echoServer = new EchoServer();
+
+        while (true) {
+            echoServer.start();
+        }
+    }
+}
+```
+
+
+
+### Netty-NIO
+
+Client:
+
+```java
+package com.wenbin.netty.client;
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+
+import java.net.InetSocketAddress;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 18:06
+ * @Description:
+ */
+public class EchoClient {
+
+    private final String host;
+
+    private final int port;
+
+    public EchoClient(String host, int port) {
+        this.host = host;
+        this.port = port;
+    }
+
+    public void start() throws InterruptedException {
+        EventLoopGroup group = new NioEventLoopGroup();
+
+        try {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.group(group)
+                    .channel(NioSocketChannel.class)
+                    .remoteAddress(new InetSocketAddress(host, port))
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(new EchoClientHandler());
+                        }
+                    });
+
+            ChannelFuture f = bootstrap.connect().sync();
+            f.channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully().sync();
+        }
+    }
+
+    public static void main(String[] args)
+            throws Exception {
+
+        final String host = "127.0.0.1";
+        final int port = 8090;
+        new EchoClient(host, port).start();
+    }
+}
+```
+
+EchoClientHandler:
+
+```java
+package com.wenbin.netty.client;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.CharsetUtil;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 18:09
+ * @Description:
+ */
+public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!"
+                , CharsetUtil.UTF_8));
+    }
+
+    @Override
+    public void channelRead0(ChannelHandlerContext ctx, ByteBuf in) {
+        System.out.println(
+                "Client received: " + in.toString(CharsetUtil.UTF_8));
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx,
+                                Throwable cause) {
+        cause.printStackTrace();
+        ctx.close();
+    }
+}
+```
+
+Server:
+
+```java
+package com.wenbin.netty.server;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.net.InetSocketAddress;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 18:16
+ * @Description:
+ */
+public class EchoServer {
+    private final int port;
+
+    public EchoServer(int port) {
+        this.port = port;
+    }
+
+
+    public void start() throws InterruptedException {
+        final EchoServerHandler serverHandler = new EchoServerHandler();
+
+        EventLoopGroup group = new NioEventLoopGroup();
+
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(group)
+                    .channel(NioServerSocketChannel.class)
+                    .localAddress(new InetSocketAddress(port))
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(serverHandler);
+                        }
+                    });
+            ChannelFuture f = serverBootstrap.bind().sync();
+            f.channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully().sync();
+        }
+    }
+
+    public static void main(String[] args)
+            throws Exception {
+        int port = 8090;
+        new EchoServer(port).start();
+    }
+}
+```
+
+EchoServerHandler:
+
+```java
+package com.wenbin.netty.server;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/12 18:20
+ * @Description:
+ */
+public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        ByteBuf in = (ByteBuf) msg;
+        System.out.println(
+                "Server received: " + in.toString(CharsetUtil.UTF_8));
+        ctx.write(in);
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
+                .addListener(ChannelFutureListener.CLOSE);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        cause.printStackTrace();
+        ctx.close();
+    }
+}
+```
+
+用netty实现,可以和JDK的实现做一下对比.使用netty要简单很多.
+
 ### AIO(异步)
 
+完全异步的实现
 
 
-## 总结
 
-## 几种IO模型的功能和特性对比
+
 
 ### 
