@@ -28,8 +28,9 @@
 
 ### Linux系统socket通信
 
+发送:应用首先在用户态内存中存储socket发送内容,然后通过用户态内存将发送内容复制到系统内核态内存,系统内核操控物理硬件网卡发送内容.
 
-应用首先在用户态内存中存储socket发送内容,然后通过用户态内存将发送内容复制到系统内核态内存,系统内核操控物理硬件网卡发送内容.
+接收:tcp连接创建后,网卡收到内容 交给系统内核态  用户态内存从系统内核态内存读取内容
 
 **socket()**,监听自己的网卡 网卡接收到内容 交给系统内核态  用户态内存从系统内核态内存读取内容
 **send()**,从用户态内存复制到内核态内存放 通过物理网卡发送
@@ -182,7 +183,7 @@ public class TimeClient {
 
 Server代码:
 
-```
+```java
 package com.wenbin.bio2;
 
 import java.io.IOException;
@@ -337,7 +338,7 @@ public class TimeServer {
 
 线程池代码:
 
-```
+```java
 package com.wenbin.bio2.thread.pool;
 
 import java.util.concurrent.ArrayBlockingQueue;
