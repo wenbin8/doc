@@ -842,10 +842,415 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
 ### AIO(异步)
 
-完全异步的实现
+jdk7中新增了一些与文件(网络)I/O相关的一些api。这些API被称为NIO.2，或称为AIO(Asynchronous I/O)。AIO最大的一个特性就是异步能力，这种能力对socket与文件I/O都起作用。AIO其实是一种在读写操作结束之前允许进行其他操作的I/O处理。AIO是对JDK1.4中提出的同步非阻塞I/O(NIO)的进一步增强。
 
 
+
+jdk7主要增加了三个新的异步通道:
+
+- AsynchronousFileChannel: 用于文件异步读写；
+
+- AsynchronousSocketChannel: 客户端异步socket；
+
+- AsynchronousServerSocketChannel: 服务器异步socket。
+
+  
+
+异步的处理:
+
+异步无非是通知系统做一件事情。然后忘掉它，自己做其他事情去了。很多时候系统做完某一件事情后需要一些后续的操作。怎么办？这时候就是告诉异步调用如何做后续处理。通常有两种方式：
+
+- 将来式: 当你希望主线程发起异步调用，并轮询等待结果的时候使用将来式;
+- 回调式: 常说的异步回调就是它。
+
+Client代码:
+
+```java
+package com.wenbin.aio;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 10:58
+ * @Description:
+ */
+public class TimeClienAio {
+
+    public static void main(String[] args) {
+        int port = 8091;
+        if (args != null && args.length > 0) {
+            try {
+                port = Integer.valueOf(args[0]);
+            } catch (NumberFormatException e) {
+
+            }
+        }
+
+        // 新建个线程不用管了请求发送和响应都会在内部处理
+        new Thread(new AsyncTimeClientHandler("127.0.0.1", port),
+                "AIO-AsyncTimeClientHandler-001").start();
+    }
+}
+```
+
+AsyncTimeClientHandler:
+
+```java
+package com.wenbin.aio;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.util.concurrent.CountDownLatch;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 11:00
+ * @Description:
+ */
+public class AsyncTimeClientHandler
+        implements CompletionHandler<Void, AsyncTimeClientHandler>
+        ,Runnable {
+    private AsynchronousSocketChannel client;
+    private String host;
+    private int port;
+    private CountDownLatch latch;
+
+    public AsyncTimeClientHandler(String host, int port) {
+        this.host = host;
+        this.port = port;
+        try {
+            client = AsynchronousSocketChannel.open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void run() {
+        latch = new CountDownLatch(1);
+        // 这里发起连接连接成功后内核会通知然后会调用completed方法
+        client.connect(new InetSocketAddress(host, port), this, this);
+
+        try {
+            latch.await();
+            client.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void completed(Void result, AsyncTimeClientHandler attachment) {
+        byte[] req = "QUERY TIME ORDER".getBytes();
+        ByteBuffer writeBuffer = ByteBuffer.allocate(req.length);
+        writeBuffer.put(req);
+        writeBuffer.flip();
+        // 发起写操作,系统态完成后会调用completed
+        client.write(writeBuffer, writeBuffer
+                , new CompletionHandler<Integer, ByteBuffer>() {
+                    @Override
+                    public void completed(Integer result, ByteBuffer attachment) {
+                        if (attachment.hasRemaining()) {
+                            // 发现没写完继续发起写操作完成后的处理是调用自身
+                            client.write(attachment, attachment, this);
+                        } else {
+                            ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+                            // 请求一发送等待响应,发起读操作.系统态完成后调用该Handler实现的completed方法
+                            client.read(readBuffer, readBuffer, new CompletionHandler<Integer, ByteBuffer>() {
+                                @Override
+                                public void completed(Integer result, ByteBuffer attachment) {
+                                    attachment.flip();
+                                    byte[] bytes = new byte[attachment.remaining()];
+                                    attachment.get(bytes);
+                                    String body;
+
+                                    try {
+                                        body = new String(bytes, "UTF-8");
+                                        System.out.println("Now is : " + body);
+
+                                        latch.countDown();
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void failed(Throwable exc, ByteBuffer attachment) {
+                                    try {
+                                        client.close();
+                                        latch.countDown();
+                                    } catch (IOException e) {
+                                        // ingnore on close
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void failed(Throwable exc, ByteBuffer attachment) {
+                        try {
+                            client.close();
+                            latch.countDown();
+                        } catch (IOException e) {
+                        }
+                    }
+                });
+
+    }
+
+    @Override
+    public void failed(Throwable exc, AsyncTimeClientHandler attachment) {
+        exc.printStackTrace();
+        try {
+            client.close();
+            latch.countDown();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+TimeServerAio:
+
+```java
+package com.wenbin.aio;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 11:29
+ * @Description:
+ */
+public class TimeServerAio {
+    public static void main(String[] args) {
+        int port = 8091;
+        if (args != null && args.length > 0) {
+            try {
+                port = Integer.valueOf(args[0]);
+            } catch (NumberFormatException e) {
+                // 采用默认值
+            }
+        }
+        AsyncTimeServerHandler timeServer = new AsyncTimeServerHandler(port);
+        new Thread(timeServer, "AIO-AsyncTimeServerHandler-001").start();
+
+    }
+}
+```
+
+
+
+AsyncTimeServerHandler:
+
+```java
+package com.wenbin.aio;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.util.concurrent.CountDownLatch;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 11:30
+ * @Description:
+ */
+public class AsyncTimeServerHandler implements Runnable {
+
+    private int port;
+
+    public CountDownLatch latch;
+
+    public AsynchronousServerSocketChannel asynchronousServerSocketChannel;
+
+    public AsyncTimeServerHandler(int port) {
+        this.port = port;
+        try {
+            this.asynchronousServerSocketChannel = AsynchronousServerSocketChannel.open();
+            this.asynchronousServerSocketChannel.bind(new InetSocketAddress(port));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void run() {
+        latch = new CountDownLatch(1);
+
+        doAccept();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void doAccept() {
+        // 监听客户端的连接
+        this.asynchronousServerSocketChannel
+                .accept(this, new AcceptCompletionHandler());
+    }
+}
+```
+
+AcceptCompletionHandler:
+
+```java
+package com.wenbin.aio;
+
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 11:33
+ * @Description:
+ */
+public class AcceptCompletionHandler
+        implements CompletionHandler<AsynchronousSocketChannel, AsyncTimeServerHandler>{
+
+    @Override
+    public void completed(AsynchronousSocketChannel result, AsyncTimeServerHandler attachment) {
+        // 次accept只能与一个客户端通信，并且处理接收请求的线程最后都被标记为interrupted。所以每次accept方法要重新注册使用。
+        attachment.asynchronousServerSocketChannel.accept(attachment, this);
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        // 连接进来了发起一个读操作
+        result.read(buffer, buffer, new ReadCompletionHandler(result));
+    }
+
+    @Override
+    public void failed(Throwable exc, AsyncTimeServerHandler attachment) {
+        exc.printStackTrace();
+        attachment.latch.countDown();
+    }
+}
+```
+
+ReadCompletionHandler:
+
+```java
+package com.wenbin.aio;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.util.Date;
+
+/**
+ * @Auther: wenbin
+ * @Date: 2019/6/13 11:36
+ * @Description:
+ */
+public class ReadCompletionHandler implements CompletionHandler<Integer, ByteBuffer> {
+
+    private AsynchronousSocketChannel channel;
+
+    public ReadCompletionHandler(AsynchronousSocketChannel channel) {
+        if (this.channel == null) {
+            this.channel = channel;
+        }
+    }
+
+    @Override
+    public void completed(Integer result, ByteBuffer attachment) {
+        attachment.flip();
+        byte[] body = new byte[attachment.remaining()];
+        attachment.get(body);
+
+        try {
+            String req = new String(body, "UTF-8");
+            System.out.println("The time server receive order:" + req);
+            String currentTime = "QUERY TIME ORDER".equalsIgnoreCase(req) ?
+                    new Date(System.currentTimeMillis()).toString() : "BAD ORDER";
+            // 数据读取完毕,要响应,发起写操作.吧响应数据写个内核态
+            doWrite(currentTime);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void doWrite(String currentTime) {
+        if (currentTime != null && currentTime.trim().length() > 0) {
+            byte[] bytes = (currentTime).getBytes();
+            ByteBuffer writeBuffer = ByteBuffer.allocate(bytes.length);
+            writeBuffer.put(bytes);
+            writeBuffer.flip();
+            channel.write(writeBuffer, writeBuffer,
+                    new CompletionHandler<Integer, ByteBuffer>() {
+                        @Override
+                        public void completed(Integer result, ByteBuffer buffer) {
+                            // 如果没有发送完成，继续发送
+                            if (buffer.hasRemaining())
+                                channel.write(buffer, buffer, this);
+                        }
+
+                        @Override
+                        public void failed(Throwable exc, ByteBuffer attachment) {
+                            try {
+                                channel.close();
+                            } catch (IOException e) {
+                                // ingnore on close
+                            }
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void failed(Throwable exc, ByteBuffer attachment) {
+        try {
+            this.channel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+
+
+文章所有代码:https://github.com/wenbin8/netty
+
+
+
+### 总结
+
+用一个个人感觉很形象的例子总结一下.如果你想吃一份宫保鸡丁盖饭：
+
+- 同步阻塞：你到饭馆点餐，然后在那等着，还要一边喊：好了没啊！
+- 同步非阻塞：在饭馆点完餐，就去遛狗了。不过溜一会儿，就回饭馆喊一声：好了没啊！
+- 异步阻塞：遛狗的时候，接到饭馆电话，说饭做好了，让您亲自去拿。
+- 异步非阻塞：饭馆打电话说，我们知道您的位置，一会给你送过来，安心遛狗就可以了。
 
 
 
 ### 
+
+## 他山之石
+
+- java中的NIO: [http://www.jianshu.com/p/a33f741fe450](https://www.jianshu.com/p/a33f741fe450)
+- Unix下五种IO模型:
+  [http://www.cnblogs.com/virusolf/p/4946975.html](https://link.jianshu.com/?t=http://www.cnblogs.com/virusolf/p/4946975.html)
+- IO设计模式: Reactor和Proactor对比:
+  [https://segmentfault.com/a/1190000002715832](https://link.jianshu.com/?t=https://segmentfault.com/a/1190000002715832)
+- proactor: [http://www.laputan.org/pub/sag/proactor.pdf](https://link.jianshu.com/?t=http://www.laputan.org/pub/sag/proactor.pdf)
+- Java7中增加的新特性:
+  [http://wn398.github.io/2014/04/01/Java7%E4%B8%AD%E5%A2%9E%E5%8A%A0%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7/](https://link.jianshu.com/?t=http://wn398.github.io/2014/04/01/Java7中增加的新特性/)
+- 基于Java NIO2实现的异步非阻塞消息通信框架:
+  [http://codepub.cn/2016/02/26/Asynchronous-non-blocking-message-communication-framework-based-on-Java-NIO2/](https://link.jianshu.com/?t=http://codepub.cn/2016/02/26/Asynchronous-non-blocking-message-communication-framework-based-on-Java-NIO2/)
+- Java新一代网络编程模型AIO原理及Linux系统AIO介绍:
+  [http://www.52im.net/thread-306-1-1.html](https://link.jianshu.com/?t=http://www.52im.net/thread-306-1-1.html)
+- java aio 编程: [http://colobu.com/2014/11/13/java-aio-introduction/](https://link.jianshu.com/?t=http://colobu.com/2014/11/13/java-aio-introduction/)
+- [高并发Java 八] NIO和AIO: [https://my.oschina.net/hosee/blog/615269](https://link.jianshu.com/?t=https://my.oschina.net/hosee/blog/615269)
+- java中的AIO:https://blog.csdn.net/moakun/article/details/81042877
