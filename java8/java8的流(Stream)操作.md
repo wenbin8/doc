@@ -1083,7 +1083,69 @@ characteristics方法返回一个int,代表 Spliterator本身特性集的编码.
 - CONCURRENT int型 值为4096 表示元素可以被多个线程安全并发得修改而不需要外部的同步。
 - SUBSIZED int型 值为16384 表示trySplit()返回的结果都是SIZED和SUBSIZED
 
+#### 组合异步编程
 
+这里实现了,多线程的拆分-合并-拆分-合并输出结果.
+
+```java
+// 组合异步
+        List<String> list= menu.stream()
+                // 拆分线程
+                .map(s -> CompletableFuture.supplyAsync(() -> {
+                    System.out.println(Thread.currentThread() + "- " + s.getName() + ":" + s.getType());
+                    return s.getName() + ":" + s.getType();
+                }))
+                // 等待执行完成
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+        
+        list.stream()
+                .filter(s -> s.length() > 2)
+                // 拆分线程计算
+                .map(s -> CompletableFuture.supplyAsync(() -> {
+                    System.out.println(Thread.currentThread() + "2- " + s);
+                    if (s.length() >= 5) {
+                        return s + " 长度大于等于5";
+                    } else {
+                        return s + " 长度小于5";
+                    }
+                }))
+                // 等待执行完成
+                .map(CompletableFuture::join)
+                // 收集结果
+                .collect(Collectors.toList())
+                .forEach(System.out::println);
+```
+
+执行结果:
+
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- pork:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- beef:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- chicken:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- french fries:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- rice:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- season fruit:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- pizza:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- prawna:FISH
+Thread[ForkJoinPool.commonPool-worker-1,5,main]- salmon:FISH
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- pork:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- beef:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- chicken:MEAT
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- french fries:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- rice:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- season fruit:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- pizza:OHTER
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- prawna:FISH
+Thread[ForkJoinPool.commonPool-worker-1,5,main]2- salmon:FISH
+pork:MEAT 长度大于等于5
+beef:MEAT 长度大于等于5
+chicken:MEAT 长度大于等于5
+french fries:OHTER 长度大于等于5
+rice:OHTER 长度大于等于5
+season fruit:OHTER 长度大于等于5
+pizza:OHTER 长度大于等于5
+prawna:FISH 长度大于等于5
+salmon:FISH 长度大于等于5
 
 ------
 

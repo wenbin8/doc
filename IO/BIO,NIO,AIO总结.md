@@ -1,4 +1,4 @@
-# :BIO,NIO,AIO总结
+# BIO,NIO,AIO总结
 
 通过对Linux系统的网络IO模型映射到java的IO实现.从而解释为什么BIO是同步阻塞,NIO是同步非阻塞,AIO是异步.
 
