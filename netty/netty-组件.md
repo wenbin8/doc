@@ -349,3 +349,324 @@ Netty的ByteBuf同时具有读索引和写索引，但JDK的ByteBuffer只有一�
 -  ByteBuf被读索引和写索引划分成3个区域：可丢弃字节区域，可读字节区域和可写字节区域
 
 ![image-20190703164521238](assets/image-20190703164521238.png)
+
+##### 可丢弃字节区
+
+可丢弃字节区域是指:[0，readerIndex)之间的区域。可调用discardReadBytes()方法丢弃已经读过的字节。
+
+    1. discardReadBytes()效果 ----- 将可读字节区域(CONTENT)[readerIndex, writerIndex)往前移动readerIndex位，同时修改读索引和写索引。
+  2. discardReadBytes()方法会移动可读字节区域内容(CONTENT)。如果频繁调用，会有多次数据复制开销，对性能有一定的影响
+
+![image-20190703172153807](assets/image-20190703172153807.png)
+
+```java
+public static void byteBufDiscardReadBytes() {
+
+    ByteBuf buffer = BYTE_BUF_FROM_SOMEWHERE;
+    buffer.writeBytes("1234".getBytes());
+    // 使用read读取,移动readerIndex索引,
+    readPrint(buffer);
+
+    // 写入一些未被读取过的数据
+    buffer.writeBytes("5678".getBytes());
+
+    System.out.println("此时第一个1234为<可丢弃字节区域>");
+    getPrint(buffer);
+    System.out.println("调用discardReadBytes(),1234被未被读取");
+    buffer.discardReadBytes();
+    getPrint(buffer);
+    // 写入abcd,在之前存入5678的地方会被新数据覆盖掉
+    buffer.writeBytes("abcd".getBytes());
+    getPrint(buffer);
+
+}
+```
+
+执行结果:
+
+```
+1234
+------------------
+此时第一个1234为<可丢弃字节区域>
+12345678                                                    
+------------------
+调用discardReadBytes()
+56785678                                                    
+------------------
+5678abcd                                                    
+------------------
+```
+
+##### 可读字节区
+
+​		ByteBuf的可读字节分段存储了实际数据。新分配的、包装的或者复制的缓冲区的默认的readerIndex值为0。任何名称以read或者skip开头的操作都将检索或者跳过位于当前readerIndex的数据，并且将它增加已读字节数。
+
+​	如果被调用的方法需要一个ByteBuf参数作为写入的目标，并且没有指定目标索引参数，那么该目标缓冲区的writerIndex也将被增加
+
+例如:
+
+![image-20190703173426479](assets/image-20190703173426479.png)
+
+如果尝试在缓冲区的可读字节数已经耗尽时从中读取数据，那么将会引发一个IndexOutOfBoundsException。
+
+
+
+##### 可写字节区
+
+​		可写字节分段是指一个拥有未定义内容的、写入就绪的内存区域。新分配的缓冲区的writerIndex的默认值为0。任何名称以write开头的操作都将从当前的writerIndex处开始写数据，并将它增加已经写入的字节数。
+
+​		如果写操作的目标也是ByteBuf，并且没有指定源索引的值，则源缓冲区的readerIndex也同样会被增加相同的大小。
+
+例如:
+
+![image-20190703173724554](assets/image-20190703173724554.png)
+
+​		如果尝试往目标写入超过目标容量的数据，将会引发一个IndexOutOfBoundException[5]。
+
+```java
+public static void writeAndGetPrint() {
+    ByteBuf buffer = BYTE_BUF_FROM_SOMEWHERE;
+    String str = "123456789";
+    // 确定写缓冲区是否还有足够的空间
+    while (buffer.writableBytes() >= 9) {
+        buffer.writeBytes(str.getBytes());
+    }
+    getPrint(buffer);
+}
+```
+
+输出结果:
+
+```
+123456789123456789123456789123456789123456789123456789      
+------------------
+```
+
+#### 索引管理
+
+1. markReaderIndex()+resetReaderIndex() ----- markReaderIndex()是先备份当前的readerIndex，resetReaderIndex()则是将刚刚备份的readerIndex恢复回来。常用于dump ByteBuf的内容，又不想影响原来ByteBuf的readerIndex的值
+2. readerIndex(int) ----- 设置readerIndex为固定的值
+3. writerIndex(int) ----- 设置writerIndex为固定的值
+4. clear() ----- 效果是: readerIndex=0, writerIndex(0)。不会清除内存
+5. 调用clear()比调用discardReadBytes()轻量的多。仅仅重置readerIndex和writerIndex的值，不会拷贝任何内存，开销较小。
+
+
+
+```java
+public static void byteBufIndexManager() {
+    ByteBuf buffer = BYTE_BUF_FROM_SOMEWHERE;
+    buffer.writeBytes("1234567890".getBytes());
+    getPrint(buffer);
+    // markReaderIndex()+resetReaderIndex() ----- markReaderIndex()是先备份当前的readerIndex，
+    // resetReaderIndex()则是将刚刚备份的readerIndex恢复回来。常用于dump ByteBuf的内容，又不想影响原
+    // 来ByteBuf的readerIndex的值
+    buffer.markReaderIndex();       // 读取前标记
+    readPrint(buffer);              // 读取一次
+    buffer.resetReaderIndex();      // reset复位ReaderIndex
+    readPrint(buffer);              // 在读取一次
+
+
+    buffer.writeBytes("123456789".getBytes());
+    getPrint(buffer);
+    // 设置readerIndex为固定的值
+    buffer.readerIndex(12);
+    readPrint(buffer);
+
+    // clear() ----- 效果是: readerIndex=0, writerIndex(0)。不会清除内存
+    buffer.clear();
+    // 使用read不会独处任何数据
+    readPrint(buffer);
+    // 使用get方法
+    getPrint(buffer);
+}
+```
+
+#### 查找操作(indexOf)
+
+​		查找ByteBuf指定的值。类似于，String.indexOf("str")操作
+
+1.  最简单的方法 ----- indexOf(）
+2.  利用ByteProcessor作为参数来查找某个指定的值。
+
+```java
+public static void byteProcessor() {
+    ByteBuf buffer = Unpooled.buffer(); //get reference form somewhere
+    byte[] b = new byte[]{(byte) 8,(byte) 9,(byte) 10};
+    buffer.writeBytes(b);
+
+    // 使用indexOf()方法来查找
+    int i = buffer.indexOf(buffer.readerIndex(), buffer.writerIndex(), (byte)9);
+    System.out.println(i);
+    // 使用ByteProcessor查找给定的值
+    int index = buffer.forEachByte(ByteProcessor.FIND_CR);
+    System.out.println(index);
+}
+```
+
+输出结果:
+
+```
+1
+-1
+```
+
+#### 派生缓冲区
+
+​		派生缓冲区为ByteBuf提供了以专门的方式来呈现其内容的视图。
+
+这类视图是通过以下方法被创建的：
+
+1. duplicate()；
+2. slice()；
+3. slice(int,int)；
+4. Unpooled.unmodifiableBuffer(…)；
+5. order(ByteOrder)；
+6. readSlice(int)。
+
+​		每个这些方法都将返回一个新的ByteBuf实例，它具有自己的读索引、写索引和标记索引。其内部存储和JDK的ByteBuffer一样也是共享的。这使得派生缓冲区的创建成本是很低廉的，但是这也意味着，如果你修改了它的内容，也同时修改了其对应的源实例，所以要小心。
+
+视图代码:
+
+```java
+public static void byteBufSlice() {
+    Charset utf8 = Charset.forName("UTF-8");
+    ByteBuf buf = Unpooled.copiedBuffer("Netty in Action rocks!", utf8);
+    ByteBuf sliced = buf.slice(0, 15);
+    System.out.println(sliced.toString(utf8));
+    // 改变下标0位置的判断两个ByteBuf值是否一样
+    buf.setByte(0, (byte)'J');
+    // 是同一套数据,所以相等.
+    System.out.println(buf.getByte(0) == sliced.getByte(0));
+}
+```
+
+执行结果:
+
+```
+Netty in Action
+true
+```
+
+复制代码:
+
+```java
+public static void byteBufCopy() {
+    Charset utf8 = Charset.forName("UTF-8");
+    ByteBuf buf = Unpooled.copiedBuffer("Netty in Action rocks!", utf8);
+    ByteBuf copy = buf.copy(0, 15);
+    System.out.println(copy.toString(utf8));
+    // 改变下标0位置的判断两个ByteBuf值是否一样
+    buf.setByte(0, (byte)'J');
+    // 不是同一数据.所以为false
+    System.out.println(buf.getByte(0) == copy.getByte(0));
+
+    getPrint(buf);
+    getPrint(copy);
+}
+```
+
+执行结果:
+
+```
+Netty in Action
+false
+Jetty in Action rocks!                                            
+------------------
+Netty in Action
+------------------
+```
+
+#### 读/写操作
+
+两种类别的读/写操作：
+
+1. get()和set()操作，从给定的索引开始，并且保持索引不变；
+2. read()和write()操作，从给定的索引开始，并且会根据已经访问过的字节数对索引进行调整。
+3. get()操作，set()操作、read()操作和write()操作完整的列表可参考书籍或API
+
+#### 更多操作
+
+​		由ByteBuf提供的其他有用操作。
+
+| 名称            | 描述                                                         |
+| --------------- | ------------------------------------------------------------ |
+| isReadable()    | 如果至少有一个字节可供读取,则返回true                        |
+| isWritable()    | 如果至少有一个字节可被写入,则返回true                        |
+| readableBytes() | 返回可被读取的字节数                                         |
+| writableBytes() | 返回可被写入的字节数                                         |
+| capacity()      | 返回ByteBuf可容纳的字节数.在此之后,它会尝试再次扩展直到达到maxCapacity() |
+| maxCapacity()   | 返回ByteBuf可以容乃的最大字节数.                             |
+| hasArray()      | 如果ByteBuf由一个字节数组支撑,则返回true                     |
+| array()         | 如果ByteBuf由一个字节数组支撑则返回该数组;否则,它将抛出一个UnsupportedOperationException |
+
+### ByteBufHolder接口
+
+ByteBufHolder为Netty的高级特性提供了支持，如缓冲区池化，可以从池中借用ByteBuf，并且在需要时自动释放。
+
+1. ByteBufHolder是ByteBuf的容器，可以通过子类实现ByteBufHolder接口，根据自身需要添加自己需要的数据字段。可以用于自定义缓冲区类型扩展字段。
+2. Netty提供了一个默认的实现DefaultByteBufHolder。
+
+ByteBufHolder的操作
+
+| 名称        | 描述                                                         |
+| ----------- | ------------------------------------------------------------ |
+| content()   | 返回由这个ByteBufHolder所持有的ByteBuf                       |
+| copy()      | 返回这个ByteBufHolder的一个深拷贝,包括一个其所包含的ByteBuf的非共享拷贝. |
+| duplicate() | 返回这个ByteBufHolder的一个浅拷贝，包括一个其所包含的ByteBuf的共享拷贝. |
+
+代码:
+
+```java
+public class DefaultByteBufHolder implements ByteBufHolder {
+
+    private final ByteBuf data;
+
+    public DefaultByteBufHolder(ByteBuf data) {
+        if (data == null) {
+            throw new NullPointerException("data");
+        }
+        this.data = data;
+    }
+
+    @Override
+    public ByteBuf content() {
+        if (data.refCnt() <= 0) {
+            throw new IllegalReferenceCountException(data.refCnt());
+        }
+        return data;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method calls {@code replace(content().copy())} by default.
+     */
+    @Override
+    public ByteBufHolder copy() {
+        return replace(data.copy());
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method calls {@code replace(content().duplicate())} by default.
+     */
+    @Override
+    public ByteBufHolder duplicate() {
+        return replace(data.duplicate());
+    }
+    // ...
+}
+```
+
+### ByteBuf分配
+
+#### 按需分配:ByteBufAllocator接口
+
+#### Unpooled缓冲区
+
+#### ByteBufUtil类
+
+
+
+### 引用计数
