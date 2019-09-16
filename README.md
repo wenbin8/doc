@@ -28,7 +28,7 @@
 
 - [x] 工厂模式
 - [x] 单例模式
-- [ ] 原型模式
+- [x] 原型模式
 - [ ] 代理模式
 - [ ] 委派模式
 - [ ] 策略模式
@@ -85,7 +85,7 @@
 
 - [ ] Mycat
 
-- [ ] NIO框架Netty
+- [x] NIO框架Netty
 
 ### 微服务(Spring boot/Spring Cloud)
 
