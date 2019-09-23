@@ -13,14 +13,28 @@
 ### 并发
 
 - [ ] JMM内存模型
+
 - [ ] synchronize
+
 - [ ] volatile
+
 - [ ] AQS
+
 - [ ] CAS
+
 - [ ] ReentrantLock源码分析
+
 - [ ] ConcurrentHashMap源码分析
+
 - [ ] 线程池
+
 - [ ] fork/join
+
+###IO
+
+- [x] BIO,NIO,AIO总结
+
+- [x] NIO框架Netty
 
 ### 常用设计模式
 
@@ -44,9 +58,8 @@
 
 Spring:
 
-- [ ] Spring5的系统架构和源码构建
+- [x] Spring5的系统架构和源码构建
 - [ ] Spring的IOC源码分析:定位\加载\注册
-- [ ] MyBatis:一条查询语句的解析执行与结果返回
 
 ### 数据库
 
@@ -66,7 +79,7 @@ Spring:
 
 #### 分布式基础
 
-- [ ] 通信协议Tcp/ip http https
+- [x] 通信协议Tcp/ip
 - [ ] 序列化与反序列化
 
 ### 分布式协调服务
@@ -92,7 +105,6 @@ Spring:
 
 - [ ] Mycat
 
-- [x] NIO框架Netty
 
 ### 微服务(Spring boot/Spring Cloud)
 
