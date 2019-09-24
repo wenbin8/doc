@@ -30,7 +30,7 @@
 
 - [ ] fork/join
 
-###IO
+### IO
 
 - [x] BIO,NIO,AIO总结
 
@@ -59,7 +59,10 @@
 Spring:
 
 - [x] Spring5的系统架构和源码构建
-- [ ] Spring的IOC源码分析:定位\加载\注册
+- [x] Spring的IOC源码分析
+- [ ] Spring的DI源码分析
+- [ ] Spring的AOP源码分析
+- [ ] Spring MVC源码分析
 
 ### 数据库
 
