@@ -60,7 +60,7 @@ Spring:
 
 - [x] Spring5的系统架构和源码构建
 - [x] Spring的IOC源码分析
-- [ ] Spring的DI源码分析
+- [x] Spring的DI源码分析
 - [ ] Spring的AOP源码分析
 - [ ] Spring MVC源码分析
 
