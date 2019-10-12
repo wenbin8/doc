@@ -488,7 +488,7 @@ System.out.println("count:" + count);
 
 另外还需要注意隐含的装箱拆箱操作.对于大集合的内部迭代会有较大的性能损耗.如下面代码:
 
-```
+```java
 int calories = menu.stream()
         .map(Dish::getCalories)
         .reduce(0, Integer::sum);
@@ -880,17 +880,17 @@ System.out.println(mostCaloricbyType);
 
  Collectors.collectingAndThen
 
-```
-				Map<Type, Dish> mostDishMap = menu.stream().collect(
-                Collectors.groupingBy(
-                        Dish::getType, Collectors.collectingAndThen(
-                                Collectors.maxBy(
-                                        Comparator.comparingInt(Dish::getCalories)
-                                ), Optional::get
+```java
+Map<Type, Dish> mostDishMap = menu.stream().collect(
+    Collectors.groupingBy(
+        Dish::getType, Collectors.collectingAndThen(
+            Collectors.maxBy(
+                Comparator.comparingInt(Dish::getCalories)
+            ), Optional::get
                         )
                 )
         );
-        System.out.println(mostDishMap);
+System.out.println(mostDishMap);
 ```
 
 mapping方法接收2个参数:一个函数对流中的元素做变换,另一个则将变换的结果对象收集起来.目的是在累加之前对每个输入元素应用一个映射函数,这样就可以接受特定类型元素的收集器适应不同类型的对象.

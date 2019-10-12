@@ -1365,7 +1365,7 @@ ChannelPipeline出站操作:
 
 ### ChannelHandlerContext
 
-​		ChannelHandlerContext代表了ChannelHandler和ChannelPipeline之间的关联，每当有ChannelHandler添加到ChannelPipeline中时，都会创建ChannelHandlerContext。ChannelHandlerContext的主要功能是管理它所关联的ChannelHandler和在同一个ChannelPipeline中的其他ChannelHandler之间的交互。
+​		**ChannelHandlerContext代表了ChannelHandler和ChannelPipeline之间的关联，每当有ChannelHandler添加到ChannelPipeline中时，都会创建ChannelHandlerContext。**ChannelHandlerContext的主要功能是管理它所关联的ChannelHandler和在同一个ChannelPipeline中的其他ChannelHandler之间的交互。
 
 ​		ChannelHandlerContext有很多的方法，其中一些方法也存在于Channel和ChannelPipeline本身上，但是有一点重要的不同。如果调用Channel或者ChannelPipeline上的这些方法，它们将沿着整个ChannelPipeline进行传播。而调用位于ChannelHandlerContext上的相同方法，则将从当前所关联的ChannelHandler开始，并且只会传播给位于该ChannelPipeline中的下一个能够处理该事件的ChannelHandler。
 
@@ -1589,7 +1589,7 @@ io.netty.channel.AbstractChannelHandlerContext#fireChannelRead代码:
 @Override
 public ChannelHandlerContext fireChannelRead(final Object msg) {
   	// findContextInbound()方法查找下一Inbound的ChannelHandler对应的ctx并返回
-  	// invokeChannelRead() 将时间继续传播到下一个ChannelHandler
+  	// invokeChannelRead将事件继续传播到下一个ChannelHandler
     invokeChannelRead(findContextInbound(), msg);
     return this;
 }
@@ -1738,7 +1738,7 @@ public static void heapBuffer() {
   // 检查ByteBuf是有支撑数组
   if (heapBuf.hasArray()) {
     // 获取支撑数组的引用
-    // 当heapBuf.hasArray()返回false时,尝试访问支撑数组将处罚UnsupportedOperationException
+    // 当heapBuf.hasArray()返回false时,尝试访问支撑数组将触发UnsupportedOperationException
     byte[] array = heapBuf.array();
     // 计算第一个字节的偏移量,也就是可以开始读的字节
     int offset = heapBuf.arrayOffset() + heapBuf.readerIndex();
@@ -2285,7 +2285,7 @@ Netty4.0版本中为ButeBuf和ButeBufHolder引入了引用计数技术。请区�
 3. buffer.retain() ----- 引用计数加1
 4. buffer.refCnt() ----- 返回当前对象引用计数值
 5. buffer.touch() ----- 记录当前对象的访问位置，主要用于调试。
-6. 引用计数并非仅对于直接缓冲区(direct Buffer)。ByteBuf的三种模式: 堆缓冲区(heap Buffer)、直接缓冲区(dirrect Buffer)和复合缓冲区(Composite Buffer)都使用了引用计数，某些时候需要程序员手动维护引用数值
+6. **引用计数并非仅对于直接缓冲区(direct Buffer)。ByteBuf的三种模式: 堆缓冲区(heap Buffer)、直接缓冲区(dirrect Buffer)和复合缓冲区(Composite Buffer)都使用了引用计数，某些时候需要程序员手动维护引用数值**
 
 ```java
 public static void releaseReferenceCountedObject(){
