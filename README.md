@@ -12,11 +12,11 @@
 
 ### 并发
 
-- [ ] 并发编程的基础
+- [x] 并发编程的基础
 
-- [ ] synchronize
+- [x] synchronize
 
-- [ ] volatile
+- [x] volatile
 
 - [ ] AQS
 
