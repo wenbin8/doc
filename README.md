@@ -18,17 +18,10 @@
 
 - [x] volatile
 
-- [ ] AQS
-
-- [ ] CAS
-
-- [ ] ReentrantLock源码分析
+- [ ] AQS底层原理分析
 
 - [ ] ConcurrentHashMap源码分析
 
-- [ ] 线程池
-
-- [ ] fork/join
 
 ### IO
 
