@@ -13,15 +13,16 @@
 ### 并发
 
 - [x] 并发编程的基础
-
 - [x] synchronize
-
 - [x] volatile
-
-- [ ] AQS底层原理分析
-
+- [x] AQS底层原理分析
+- [x] Condition及源码分析
+- [ ] CountDwonLatch及源码分析
+- [ ] Semaphore及源码分析
+- [ ] Semaphore及原理
 - [ ] ConcurrentHashMap源码分析
-
+- [ ] 阻塞队列、原子操作的原理分析
+- [ ] 线程池、forkjoin的原理分析
 
 ### IO
 

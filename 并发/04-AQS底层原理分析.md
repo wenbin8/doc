@@ -785,7 +785,7 @@ final void lock() {
 
 对比源码可以发现，非公平锁在获取锁的时候，会先通过CAS进行抢占（compareAndSetState方法），而公平锁不会。
 
-#### FaiSync.tryAcquire
+#### FairSync.tryAcquire
 
 公平锁的tryAcquire方法：
 
