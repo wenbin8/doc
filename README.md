@@ -17,10 +17,10 @@
 - [x] volatile
 - [x] AQS底层原理分析
 - [x] Condition及源码分析
-- [ ] CountDwonLatch及源码分析
-- [ ] Semaphore及源码分析
-- [ ] Semaphore及原理
-- [ ] ConcurrentHashMap源码分析
+- [x] CountDwonLatch及源码分析
+- [x] Semaphore及源码分析
+- [x] CyclicBarrier及原理
+- [x] ConcurrentHashMap源码分析
 - [ ] 阻塞队列、原子操作的原理分析
 - [ ] 线程池、forkjoin的原理分析
 
