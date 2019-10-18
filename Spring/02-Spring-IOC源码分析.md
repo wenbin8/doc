@@ -58,7 +58,7 @@ public interface BeanFactory {
    //根据bean名字得到bean实例，并同时判断这个bean是不是单例
    boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
   
-	 //根据bean名字得到bean实例，并同时判断这个bean是不是原型
+   //根据bean名字得到bean实例，并同时判断这个bean是不是原型
    boolean isPrototype(String name) throws NoSuchBeanDefinitionException;
 
    boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
