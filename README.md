@@ -21,7 +21,7 @@
 - [x] Semaphore及源码分析
 - [x] CyclicBarrier及原理
 - [x] ConcurrentHashMap源码分析
-- [ ] 阻塞队列、原子操作的原理分析
+- [x] 阻塞队列、原子操作的原理分析
 - [ ] 线程池、forkjoin的原理分析
 
 ### IO
