@@ -1,3 +1,5 @@
+
+
 # 线程池、forkjoin的原理分析
 
 ## 什么是线程池
@@ -653,4 +655,426 @@ public void execute(Runnable command) {
 
 ### 阿里开发手册不建议使用线程池
 
-手册上说：线程池的构建不允许使用Executors去创建，而是通过ThreadPoolExecutor方式。用Execu
+手册上说：线程池的构建不允许使用Executors去创建，而是通过ThreadPoolExecutor方式。用Executors使得用户不需要关心线程池的参数配置，意味着大家对于线程池的运行规则也会慢慢忽略。这会导致一个问题，比如我们用newFixedThareadPool或者singleThreadPool。允许的队列长度为Integer.MAX_VALUE，如果使用不当会导致大量请求堆积到队列中导致OOM的风向而newChacedThreadPool，允许创建线程数量为Integer.MAX_VALUE，也可能会导致大量线程的创建出现CPU使用过高或者OOM的问题。
+
+如果我们通过ThreadPoolExecutor来构造线程池的话，我们势必要了解线程池构造中每个参数的具体含义，使得开发者在配置阐述的时候能够更加谨慎。不至于在面试的时候被问到：构造一个线程池需要哪些参数，都回答不上了。
+
+### 如果合理配置线程池大小
+
+如果合理配置线程池大小，也是很多同学反馈我的问题，我也简单说一下。线程池大小不是靠猜，也不是说越多越好。
+
+在遇到这类问题时，先冷静下来分析：
+
+1. 需要分析线程池执行的任务特性：CPU密集型还是IO密集型。
+2. 每个任务执行的平均时长大概是多少，这个任务的执行时长可能还跟任务处理逻辑是否涉及到网络传输以及底层系统资源依赖有关系。
+
+如果是CPU密集型，主要是执行计算任务，响应时间很快，CPU一致在运行，这种任务CPU的利用率很高，那么线程数的配置应该根据CPU核心数来决定，CPU核心数=最大同时执行线程数，加入CPU核心数为4，那么服务器最多能同时执行4个线程。过多的线程会导致上下文切换反而使得效率低。那线程池的最大线程数可以配置为CPU核心数+1。
+
+如果是IO密集型，主要是进行IO操作，执行IO操作的时间较长，这是CPU出于空闲状态，导致CPU利用率不高，这种情况下可以增加线程池大小。这种情况下可以结合线程的等待时长去做判断，等待时间越高，那么线程数也相对越多。一般可以配置CPU核心数的2倍。
+
+一个公式：线程池设定最佳线程数= **（（线程池设定的线程等待时间+线程CPU时间）/ 线程CPU时间）* CPU数目**
+
+这个公式的**线程CPU时间**是预估的程序单个线程在CPU上运行的时间。通常使用loadrunner测试大量运行次数求出平均值。
+
+### 线程池中的线程初始化
+
+默认情况下，创建线程池之后，线程池中是没有线程的，需要提交任务之后才会创建线程。在实际中如果需要线程池创建之后立即创建线程，可以通过以下两个方法办到：perstartCoreThread():初始化一个核心线程；prestratAllCoreThreads()：初始化所有核心线程。
+
+```java
+ThreadPoolExecutor tpe=(ThreadPoolExecutor) service; 
+tpe.prestartAllCoreThreads(); 
+```
+
+### 线程池的关闭
+
+ThreadPoolExecutor提供了两个方法，用于线程池的关闭，分别是shutdown()和shutdownNow()。
+
+shutdown()：不会立即终止线程池，而是要等所有任务缓存队列中的任务都执行完后才终止。
+
+shutdownNow()：立即终止线程池，并尝试打断正在执行的任务，并且清空任务缓存队列，返回尚未执行的任务。
+
+### 线程池容量的动态调整
+
+ThreadPoolExecutor童工了动态调整线程池容量大小的方法：
+
+- setCorePoolSize()和setMaximumPoolSize()，setCorePoolSize：这只核心池大小。
+- setMaximumPoolSize：设置线程池最大能创建的线程数目大小。
+
+### 任务缓存队列及排队策略
+
+在前面我们多次提到了任务缓存队列，即workQueue，它用来存放等待执行的任务。
+
+workQueue的类型为BolckingQueue，通常可以取下面三种类型：
+
+1. ArrayBolckingQueue：基于数组的先进先出队列，此队列创建时必须指定大小。
+2. LinkedBlockingQueue：基于链表的先进先出队列，如果创建时没有指定此队列大小，则默认为Intger.MAX_VALUE。
+3. SynchronousQueue：这个队列比较特殊，它不会保存提交的任务，而是将直接新建一个线程来执行新来的任务。
+
+### 线程池的监控
+
+如果在项目中大规模的使用了线程池，那么必须要有一套监控体系，来指导当前线程池的状态，当出现问题的时候可以快速定位到问题。而线程池提供了相应的扩展方法，我们通过重写线程池的beforeExecute、afterExecute和shutdown等方式就可以实现对线程的监控，简单给大家演示一个案例：
+
+```java
+public class ThreadPoolDemo extends ThreadPoolExecutor {
+
+    // 保存任务开始执行的时间，当任务结束，用任务结束时间减去开始时间计算任务执行时间
+    private ConcurrentHashMap<String, Date> startTimes;
+
+
+    public ThreadPoolDemo(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
+
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+
+        this.startTimes = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void shutdown() {
+        System.out.println("已经执行的任务数：" + this.getCompletedTaskCount() + ","
+                + "当前活动线程：" + this.getActiveCount()
+                + "当前排队线程：" + this.getQueue().size());
+        super.shutdown();
+    }
+
+    // 任务开始之前记录任务开始时间
+    @Override
+    protected void beforeExecute(Thread t, Runnable r) {
+        startTimes.put(String.valueOf(r.hashCode()), new Date());
+        super.beforeExecute(t, r);
+    }
+
+    @Override
+    protected void afterExecute(Runnable r, Throwable t) {
+        Date startDate = startTimes.remove(String.valueOf(r.hashCode()));
+        Date finishDate = new Date();
+
+        long diff = finishDate.getTime() - startDate.getTime();
+        // 统计任务耗时、初始线程数、核心线程数、正在执行的任务数量、
+        // 已完成任务数量、任务总数、队列里缓存的任务数量、
+        // 池中存在的最大线程数、最大允许的线程数、线程空闲时间、线程池是否关闭、线程池 是否终止
+        System.out.print("任务耗时:" + diff + "\n");
+        System.out.print("初始线程数:" + this.getPoolSize() + "\n");
+        System.out.print("核心线程数:" + this.getCorePoolSize() + "\n");
+        System.out.print("正在执行的任务数量:" + this.getActiveCount() + "\n");
+        System.out.print("已经执行的任务数:"+this.getCompletedTaskCount()+"\n "); System.out.print(" 任务总数: "+this.getTaskCount()+"\n ");
+        System.out.print(" 最大允许的线程数: "+this.getMaximumPoolSize()+"\n "); System.out.print(" 线程空闲时 间: "+this.getKeepAliveTime(TimeUnit.MILLISECONDS)+"\n ");
+        System.out.println();
+
+        super.afterExecute(r, t);
+    }
+
+    public static ExecutorService newCachedThreadPool() {
+        return new ThreadPoolDemo(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue ());
+    }
+}
+```
+
+```java
+public class ThreadPoolDemoTest implements Runnable {
+    private static ExecutorService es = ThreadPoolDemo.newCachedThreadPool();
+
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 100; i++) {
+            es.execute(new ThreadPoolTest());
+        }
+
+        es.shutdown();
+    }
+}
+```
+
+## Callable/Future案例演示
+
+Callable/Future 和Thread之类的线程构建最大的区别在于，能够很方便的获取线程执行完以后的结果。首先来看一个简单的例子：
+
+```java
+public class CallableDemo implements Callable<String> {
+    public static void main(String[] args) {
+        CallableDemo callableDemo = new CallableDemo();
+        FutureTask futureTask = new FutureTask(callableDemo);
+
+        new Thread(futureTask).start();
+    }
+
+    @Override
+    public String call() throws Exception {
+        // Thread.sleep(3000);//阻塞案例演示
+        return "hello world";
+    }
+}
+```
+
+这里因为返回结果是另一个线程计算的，当前线程是不知道结果值什么时候计算完成的。所以它提供一个回调接口给计算线程，当计算完成时，调用这个回调接口，回传结果值。
+
+这个在很多地方有用到，比如Dubbo的异步调用，比如消息中间件的异步通信等等。
+
+利用FutureTask、Callable、Thread对耗时任务（如查询数据库）做预处理，在需要计算记过之前就启动计算。
+
+所以我们来看一下Future/Callable是如何实现的。
+
+### Callable/Future原理分析
+
+在刚刚实现的demo中，我们用到了两个api，分别是Callable和FutureTask。
+
+Callable是一个函数式接口，里面就只有一个call方法。子类可以重写这个方法，并且这个方法会有一个返回值：
+
+```java
+@FunctionalInterface
+public interface Callable<V> {
+    /**
+     * Computes a result, or throws an exception if unable to do so.
+     *
+     * @return computed result
+     * @throws Exception if unable to compute a result
+     */
+    V call() throws Exception;
+}
+```
+
+### FutureTask
+
+FutureTask的类关系图如下，它实现了RunnableFuture接口，那么这个RunnableFuture接口的作用是什么呢？
+
+在了解FutureTask之前，先看看Callable，Future，FutureTask它们之间的关系图，如下：
+
+<img src="assets/image-20191019120301901.png" alt="image-20191019120301901" style="zoom:50%;" />
+
+```java
+public interface RunnableFuture<V> extends Runnable, Future<V> {
+    /**
+     * Sets this Future to the result of its computation
+     * unless it has been cancelled.
+     */
+    void run();
+}
+```
+
+RunnableFuture是一个接口，它集成了Runnable和Future这两个接口，Runnable他熟悉了，那么Future是什么呢？
+
+Future表示一个任务的生命周期，并提供了相应的方法来判断是否已经完成或取消，以及获取任务的结果和取消任务等。
+
+```java
+public interface Future<V> {
+
+    boolean cancel(boolean mayInterruptIfRunning);
+
+    // 当前的Future是否被取消，返回true表示已取消。
+    boolean isCancelled();
+
+    // 当前Future是否已结束。包括运行完成、抛出异常以及取消，都表示当前Future已结束
+    boolean isDone();
+
+    // 获取Future的结果值。如果当前Future还没有结束，那么当前线程就等待
+    // 知道Future运行结束，那么会唤醒等待结果值的线程的。
+    V get() throws InterruptedException, ExecutionException;
+
+    // 获取Future的结果值。语序设置超时时间
+    V get(long timeout, TimeUnit unit)
+        throws InterruptedException, ExecutionException, TimeoutException;
+}
+```
+
+分析到这里我们其实有一些头绪了，FutureTask是Runnable和Future的结合，如果我们把Runnable比作是生产者，Future比作是消费者，那么FutureTask是被这两者共享的，生产者运行run方法计算结果，消费者通过get方法获取结果。
+
+作为生产者消费者模式，有一个很重要的机制，就是如果生产者数据还没准备的时候，消费者会被阻塞。当生产者数据准备好了以后会唤醒消费者继续执行。
+
+这个有点像我们上次分析的阻塞队列，那么在FutureTask里面是基于什么方式实现的呢？
+
+#### state的含义
+
+表示 FutureTask 当前的状态，分为七种状态 
+
+```java
+private volatile int state
+// NEW新建状态，表示这个FutureTask还没有开始运行
+private static final int NEW          = 0;
+// COMPLETING 完成状态，表示FutureTask任务已经计算完毕了
+// 但是还有一些后续操作，例如唤醒等待线程操作，还没有完成。
+private static final int COMPLETING   = 1;
+// FutureTask任务完结，正常完成，没有发生异常
+private static final int NORMAL       = 2;
+// FutureTask任务完结，因为发生异常
+private static final int EXCEPTIONAL  = 3;
+// FutureTask任务完结，因为取消任务
+private static final int CANCELLED    = 4;
+// FutureTask任务完结，也是取消任务，不过发起了中断运行任务线程的中断请求
+private static final int INTERRUPTING = 5;
+// FutureTask任务完结，也是取消任务，已经完成了中断运行任务线程的中断请求
+private static final int INTERRUPTED  = 6;
+```
+
+#### run方法
+
+
+```java
+public void run() {
+    // 如果状态 state 不是 NEW，或者设置 runner 值失败
+    // 表示有别的线程在此之前调用 run 方法，并成功设置了 runner 值
+    // 保证了只有一个线程可以运行 try 代码块中的代码。
+    if (state != NEW ||
+        !UNSAFE.compareAndSwapObject(this, runnerOffset,
+                                     null, Thread.currentThread()))
+        return;
+    try {
+        Callable<V> c = callable;
+        // 只有正确传入了callable并且状态state为NEW的情况才会执行
+        if (c != null && state == NEW) {
+            V result;
+            boolean ran;
+            try {
+                //调用 callable 的 call 方法，并获得返回结果
+                result = c.call();
+                //运行成功
+                ran = true;
+            } catch (Throwable ex) {
+                result = null;
+                ran = false;//设置异常结果，
+                setException(ex);
+            }
+            if (ran)
+                //设置结果
+                set(result);
+        }
+    } finally {
+        // runner must be non-null until state is settled to
+        // prevent concurrent calls to run()
+        runner = null;
+        // state must be re-read after nulling runner to prevent
+        // leaked interrupts
+        int s = state;
+        if (s >= INTERRUPTING)
+            handlePossibleCancellationInterrupt(s);
+    }
+}
+```
+
+run方法作用非常简单，就是调用callable方法返回结果值result，根据是否发生异常，调用set(result)或setExcetion(ex)方法表示FutureTask任务完结。
+
+不过因为FutureTask任务都是在多线程环境中使用，所以要注意并发冲突问题。注意在run方法中，我们没有使用synchronized代码块或者Lock来解决并发问题，而是使用了CAS这个乐观锁来实现并发安全，保证只有一个线程能运行FutureTask任务。
+
+#### get方法
+
+get方法就是阻塞获取线程执行结果，这里主要做了两个事情：
+
+1. 判断当前的状态，如果状态小于等于COMPLETING，表示FutureTask任务还没有完结，所以调用awaitDone方法，让当前线程等待。
+2. report返回结果值或者抛出异常。
+
+```java
+public V get() throws InterruptedException, ExecutionException {
+    int s = state;
+    if (s <= COMPLETING)
+        s = awaitDone(false, 0L);
+    return report(s);
+}
+```
+
+#### awaitDone
+
+如果当前的结果还没有被执行完，把当前线程和插入到等待队列。
+
+```java
+private int awaitDone(boolean timed, long nanos)
+    throws InterruptedException {
+    final long deadline = timed ? System.nanoTime() + nanos : 0L;
+    WaitNode q = null;
+    boolean queued = false; // 节点是否已添加
+    for (;;) {
+        // 如果当前线程中断标志位是 true，
+		// 那么从列表中移除节点q，并抛出InterruptedException异常
+        if (Thread.interrupted()) {
+            removeWaiter(q);
+            throw new InterruptedException();
+        }
+
+        int s = state;
+        // 当状态大于COMPLETING时，表示FutureTask任务已结束。
+        if (s > COMPLETING) {
+            if (q != null)
+                // 将节点q线程设置为null，因为线程没有阻塞等待
+                q.thread = null;
+            return s;
+        }
+        // 表示还有一些后序操作没有完成，那么当前线程让出执行权
+        else if (s == COMPLETING) // cannot time out yet
+            Thread.yield();
+        // 表示状态是 NEW，那么就需要将当前线程阻塞等待。
+        // 就是将它插入等待线程链表中，
+        else if (q == null)
+            q = new WaitNode();
+        else if (!queued)
+            // 使用CAS函数将新节点添加到链表中，如果添加失败，那么queued为false，
+            // 下次循环时，会继续添加，知道成功。
+            queued = UNSAFE.compareAndSwapObject(this, waitersOffset,
+                                                 q.next = waiters, q);
+        // timed 为true表示需要设置超时
+        else if (timed) {
+            nanos = deadline - System.nanoTime();
+            if (nanos <= 0L) {
+                removeWaiter(q);
+                return state;
+            }
+            // 让当前线程等待nanos时间
+            LockSupport.parkNanos(this, nanos);
+        }
+        else
+             // 让当前线程等待
+            LockSupport.park(this);
+    }
+}
+```
+
+**被阻塞的线程，会等到 run 方法执行结束之后被唤醒。**
+
+#### report
+
+repor 方法就是根据传入的状态值s，来决定是抛出异常，还是返回结果值。这个两种情况都表示FutureTask 完结了。
+
+```java
+private V report(int s) throws ExecutionException {
+    // 表示call的返回值
+    Object x = outcome;
+    // 表示正常完结状态，所以返回结果值
+    if (s == NORMAL)
+        return (V)x;
+    // 大于或等于CANCELLED，都表示手动取消FutureTask任务，
+    // 所以抛出CancellationException异常
+    if (s >= CANCELLED)
+        throw new CancellationException();
+    
+    // 否则就是运行过程中，发生了异常，这里就抛出这个异常
+    throw new ExecutionException((Throwable)x);
+}
+```
+
+## 线程池对Future/Callable的执行
+
+我们现在再来看线程池里面的 submit 方法，就会很清楚了。 
+
+
+
+### **AbstractExecutorService.submit** 
+
+调用抽象类中的submit方法，这里其实相对于execute方法来说，只多做了一步操作，就是封装了一个 RunnableFuture 
+
+```java
+public Future<?> submit(Runnable task) {
+    if (task == null) throw new NullPointerException();
+    RunnableFuture<Void> ftask = newTaskFor(task, null);
+    execute(ftask);
+    return ftask;
+}
+```
+
+### **ThreadpoolExecutor.execute** 
+
+然后调用 execute 方法，这里面的逻辑前面分析过了，会通过worker线程来调用过ftask的run方法。而这个 ftask其实就是FutureTask里面最终实现的逻辑。
