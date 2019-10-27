@@ -15,7 +15,7 @@ Spring是为解决企业级应用的复杂性而设计，它可以做很多事�
 
 Spring是面向Bean的编程（Bean Oriented Programming, BOP），Bean在Spring中才是真正的主角。Bean在Spring中的作用就像Object对OOP的意义一样，Spring中没有Bean也就没有Spring存在的意义。Spring提供了IOC容器通过配置文件或者注解的方式来管理对象之间的依赖关系。
 
-控制反转，其中最常见的实现方式叫做依赖注入（Dependency Injection, DI），还有一种方式叫“依赖查找”（Dependency Lookup, DL），它在C++、Java、PHP以及.net中都有运用。在最早的Spring中是包含有依赖注入方法和依赖查询的，但因为依赖查询使用频率过低，不久就被Spring移除了，所以在Spring中控制反转也被直接称作依赖注入，它的基本概念是：不创建对象，但是描述创建对象的方式。在代码中不直接与对象和服务连接，但在配置文件中面熟哪一个组件需要那一项服务。容器（IOC容器）负责将这些联系在一起。
+控制反转，其中最常见的实现方式叫做依赖注入（Dependency Injection, DI），还有一种方式叫“依赖查找”（Dependency Lookup, DL），它在C++、Java、PHP以及.net中都有运用。在最早的Spring中是包含有依赖注入方法和依赖查询的，但因为依赖查询使用频率过低，不久就被Spring移除了，所以在Spring中控制反转也被直接称作依赖注入，它的基本概念是：不创建对象，但是描述创建对象的方式。在代码中不直接与对象和服务连接，但在配置文件中描述哪一个组件需要那一项服务。容器（IOC容器）负责将这些联系在一起。
 
 ​	在典型的IOC场景中，容器创建了所有对象，并设置必要的属性将它们连接在一起，决定什么事件调用方法。
 
@@ -32,11 +32,11 @@ Bean工厂的概念是Spring作为IOC容器的基础。IOC则将处理事情的�
 
 ### AOP编程
 
-​	面向切面编程，即AOP，是一种编程思想，它允许程序员对横切关注点或者横切典型的职责分界线的行为（例如日志和事务管理）进行模块化。AOP的核心构造是方面（切面），它将那些影响多个类的行为封装到可重用的模块中。
+面向切面编程，即AOP，是一种编程思想，它允许程序员对横切关注点或者横切典型的职责分界线的行为（例如日志和事务管理）进行模块化。AOP的核心构造是方面（切面），它将那些影响多个类的行为封装到可重用的模块中。
 
 ​	AOP和IOC是补充性的技术，它们都运用模块化方式解决企业应用程序开发中的复杂问题。在典型的面向对象开发中，可能要将日志记录语句放在所有方法和Java类中才能实现日志功能。在AOP方式中，可以反过来将日志服务模块化，并以声明的方式将它们应用到需要日志的组件上。当然，优势就是Java类不需要知道日志服务的存在，也不需要考虑相关代码。所以，用Spring AOP编写的应用程序代码是松耦合的。
 
-AOP的功能完成集成到了Spring事务管理、日志和其他各种特性的上下文中。
+AOP的功能完全集成到了Spring事务管理、日志和其他各种特性的上下文中。
 
 AOP编程的常用场景有：Authentication(权限认证)、Auto Caching(自动缓存处理)、Error Handling(统一错误处理)、Debugging（调试信息输出）、Logging（日志记录）、Transactions（事务处理）等。
 
@@ -56,7 +56,7 @@ Spring总共大约有20个模块，由1300多个不同的文件构成。而这�
 
 spring-core和spring-beans模块是Spring框架的核心模块，包含了控制反转（Inversion of Control）和依赖注入（Denpendency Injection,DI）。BeanFactory接口是Spring框架中的核心接口，它是工厂模式的具体实现。BeanFactory使用控制反转对应用程序的配置和依赖规范与实际应用程序代码进行了分离。但BeanFactory容器实例化后并不会自动实例化Bean，只有当Bean被使用时BeanFactory容器才会对该Bean进行实例化与依赖关系装配。
 
-spring-context模块构架与核心模块之上，他扩展了BeanFactory，为BeanFactory添加了Bean生命周期控制、框架事件体系以及资源加载透明化等功能。此外该模块还提供了许多企业级支持，如邮件访问、远程访问、任务调度等，ApplicationContext是该模块的核心接口，他的超累是BeanFactory。与BeanFactory不同，ApplicationContext容器实例化后会自动对所有的单实例Bean进行实例化与依赖关系装配，使之处于待用状态。
+spring-context模块构架于核心模块之上，他扩展了BeanFactory，为BeanFactory添加了Bean生命周期控制、框架事件体系以及资源加载透明化等功能。此外该模块还提供了许多企业级支持，如邮件访问、远程访问、任务调度等，ApplicationContext是该模块的核心接口，他的超类是BeanFactory。与BeanFactory不同，ApplicationContext容器实例化后会自动对所有的单实例Bean进行实例化与依赖关系装配，使之处于待用状态。
 
 spring-context-support模块是对Spring IOC容器的扩展支持，以及IOC子容器。
 
@@ -72,7 +72,7 @@ spring-aop是Spring的另一个核心模块，是AOP主要的实现模块。作�
 
 spring-aspects模块继承自AspectJ框架，主要是为Spring AOP提供多种AOP实现方法。
 
-spring-instrument模块是基于JAVA SE中的```java.lang.instrument```进行设计的，应该算是AOP的一个支援模块，主要作用是在JVM启用时，生成一个代理类，程序员公国代理类在运行时修改类的字节，从而改变一个类的功能，实现AOP的功能。在分类里，我把它分在了AOP模块下，在Spring光放文档里对这个地方也有点含糊不清。
+spring-instrument模块是基于JAVA SE中的```java.lang.instrument```进行设计的，应该算是AOP的一个支援模块，主要作用是在JVM启用时，生成一个代理类，程序员通过代理类在运行时修改类的字节，从而改变一个类的功能，实现AOP的功能。在分类里，我把它分在了AOP模块下，在Spring官方文档里对这个地方也有点含糊不清。
 
 #### 数据访问与集成
 
@@ -92,7 +92,7 @@ spring-jms模块（Java Messaging Service）能够发送和接受信息，自Spr
 
 ​	由spring-web、spring-webmvc、spring-websocket和spring-webflux，4个模块组成。
 
-​	spring-web模块为Spring提供了最基础的Web支持，主要简历与核心容器之上，通过Servlet或者Listeners来初始化IOC容器，也包含一些与Web相关的支持。
+​	spring-web模块为Spring提供了最基础的Web支持，主要建立于核心容器之上，通过Servlet或者Listeners来初始化IOC容器，也包含一些与Web相关的支持。
 
 ​	spring-webmvc模是一个Web-Servlet模块，试想了Spring MVC（model-view-controller）的Web应用。
 
@@ -152,7 +152,7 @@ dongwenbindeMacBook-Pro:spring-framework-5.0.2.RELEASE dongwenbin$
 
 ```
 
-在信息里看到Gradle被brew安装到了：/usr/local/Cellar/gradle/5.6.2目录下。记录下来就好后面构建的时候回用到。
+在信息里看到Gradle被brew安装到了：/usr/local/Cellar/gradle/5.6.2目录下。记录下来就好后面构建的时候会用到。
 
 ### 导入代码
 

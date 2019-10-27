@@ -75,11 +75,11 @@ public interface BeanFactory {
 }
 ```
 
-在BeanFactory里只对IOC容器的基本行为了作了定义，根本不关系你的Bean是如何定义怎样加载的。正如我们只关心工厂里得到什么的产品对象，至于工厂是怎么生产这些对象，这个基本的接口不关心。
+在BeanFactory里只对IOC容器的基本行为了作了定义，根本不关心你的Bean是如何定义怎样加载的。正如我们只关心工厂里得到什么的产品对象，至于工厂是怎么生产这些对象，这个基本的接口不关心。
 
 ​	而要知道工厂是如何生产对象的，我们需要看具体的IOC容器实现，Spring提供了许多IOC容器的实现。比如：GenericApplicationContext、ClasspathXmlApplicationContext等。
 
-​	ApplicationContext是Spring提供的一个高级IOC容器，它除了能够提供IOC容器的基本功能外，还为用户提供了一下附加服务。从ApplicationContext接口实现，总结其特点：
+​	ApplicationContext是Spring提供的一个高级IOC容器，它除了能够提供IOC容器的基本功能外，还为用户提供了以下附加服务。从ApplicationContext接口实现，总结其特点：
 
 1. 支持信息源，可以实现国际化。（实现MessageSource接口）
 2. 访问资源。（实现ResourcePatternResolver接口）
@@ -109,7 +109,7 @@ Spring中BeanDefinitionReader的类结构图：
 
 ![image-20190923132630109](/Users/dongwenbin/github/doc/Spring/assets/image-20190923132630109.png)
 
-ApplicationContext允许上下文嵌套，通过保持父上下文可以维持一个上下文体系。对于Bean的查找可以在这个上下文体系中发生，首先检查当前上下文，其次是父上下文，逐级向上，这样为不同的Spring应用提供了一个共享的Bean定义环境。
+**ApplicationContext允许上下文嵌套，通过保存父上下文可以维持一个上下文体系。对于Bean的查找可以在这个上下文体系中发生，首先检查当前上下文，其次是父上下文，逐级向上，这样为不同的Spring应用提供了一个共享的Bean定义环境。**
 
 ### 源码分析
 
@@ -148,7 +148,7 @@ public ClassPathXmlApplicationContext(
 
 通过分析ClassPathXmlApplicationContext的源代码可以知道，在创建ClassPathXmlApplicationContext容器时，构造方法做一下两项重要工作：
 
-1，调用父类容器的构造老方法```super(parent)```为容器设置好Bean资源加载器。
+1，调用父类容器的构造方法```super(parent)```为容器设置好Bean资源加载器。
 
 2，在调用AbstractRefreshableConfigApplicationContext的setConfigLocations(configLoactions)方法设置Bean配置信息的定位路径。
 
@@ -395,7 +395,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
 		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
-		//创建XmlBeanDefinitionReader，即创建Bean读取器，并通过回调设置到容器中去，容  器使用该读取器读取Bean定义资源
+		//创建XmlBeanDefinitionReader，即创建Bean读取器，并通过回调设置到容器中去，容器使用该读取器读取Bean定义资源
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
 		// Configure the bean definition reader with this context's
@@ -2413,5 +2413,5 @@ protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
 现在通过上面的代码，总结一下IOC容器初始化的基本步骤：
 
 1. 初始化的入口在容器实现中的refresh()调用来完成。
-2. 对Bean定义载入IOC容器使用的方法是loadBeanDefinition()，其中大致过程如下：通过ResourceLoader来完成资源文件位置的定位，DefaultResourceLoader是默认实现，同时上下文本身就给出了ResourceLoader的实现，可以从类路径、文件系统、URL等方式来定位资源位置。如果是XmlBeanFactory作为IOC容器，那么需要为它指定Bean定义的资源，也就是Bean定义文件时通过Resource来呗IOC容器处理，容器通过BeanDefinitionReader来完成定义信息的解析和Bean信息注册，往往使用的是XmlBeanDefinitionReader来解析Bean的XML定义文件，实际处理过程是委托给BeanDefinitionParserDelegate来完成的，从而得到bean的定义信息，这些信息在Spring中使用BeanDefinition对象来表示，这个名字可以让我们想到 loadBeanDefinition(),registerBeanDefinition() 这些相关方法。它们都是为处理 BeanDefinitin 服务的，容器解析得到 BeanDefinition 以后，需要把 它在 IOC 容器中注册，这由 IOC 实现 BeanDefinitionRegistry 接口来实现。注册过程就是在 IOC 容器 内部维护的一个 HashMap 来保存得到的 BeanDefinition 的过程。这个 HashMap 是 IOC 容器持有 Bean 信息的场所，以后对 Bean 的操作都是围绕这个 HashMap 来实现的。
-3. 然后通过 BeanFactory 和 ApplicationContext 来享受到 Spring IOC 的服务了,在使用 IOC 容器的时候，我们注意到除了少量粘合代码，绝大多数以正确 IOC 风格编写的应用程序代码完全不用关 心如何到达工厂，因为容器将把这些对象与容器管理的其他对象钩在一起。基本的策略是把工厂放到已 知的地方，最好是放在对预期使用的上下文有意义的地方，以及代码将实际需要访问工厂的地方。Spring 本身提供了对声明式载入 web 应用程序用法的应用程序上下文,并将其存储在 ServletContext 中的框架 实现。
+2. 对Bean定义载入IOC容器使用的方法是loadBeanDefinition()，其中大致过程如下：通过ResourceLoader来完成资源文件位置的定位，DefaultResourceLoader是默认实现，同时上下文本身就给出了ResourceLoader的实现，可以从类路径、文件系统、URL等方式来定位资源位置。如果是XmlBeanFactory作为IOC容器，那么需要为它指定Bean定义的资源，也就是Bean定义文件时通过Resource来把IOC容器处理，容器通过BeanDefinitionReader来完成定义信息的解析和Bean信息注册，往往使用的是XmlBeanDefinitionReader来解析Bean的XML定义文件，实际处理过程是委托给BeanDefinitionParserDelegate来完成的，从而得到bean的定义信息，这些信息在Spring中使用BeanDefinition对象来表示，这个名字可以让我们想到 loadBeanDefinition(),registerBeanDefinition() 这些相关方法。它们都是为处理 BeanDefinitin 服务的，容器解析得到 BeanDefinition 以后，需要把它在 IOC 容器中注册，这由IOC实现BeanDefinitionRegistry接口来实现。注册过程就是在IOC容器内部维护的一个 HashMap来保存得到的BeanDefinition的过程。这个HashMap是IOC容器持有Bean信息的场所，以后对Bean的操作都是围绕这个HashMap来实现的。
+3. 然后通过BeanFactory和ApplicationContext来享受到Spring IOC的服务了,在使用IOC容器的时候，我们注意到除了少量粘合代码，绝大多数以正确 IOC 风格编写的应用程序代码完全不用关心如何到达工厂，因为容器将把这些对象与容器管理的其他对象钩在一起。基本的策略是把工厂放到已知的地方，最好是放在对预期使用的上下文有意义的地方，以及代码将实际需要访问工厂的地方。Spring 本身提供了对声明式载入 web 应用程序用法的应用程序上下文,并将其存储在 ServletContext 中的框架 实现。
