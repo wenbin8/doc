@@ -1,12 +1,10 @@
-
-
 # 线程池、forkjoin的原理分析
 
 ## 什么是线程池
 
 在Java中，如果每个请求到达就创建一个新线程，创建和销毁线程花费的时间和消耗的系统资源都相当大，甚至可能要比在处理实际的用户请求的时间和资源要多的多。
 
-如果在一个JVM里面创建太多线程，可能会使系统由于过度消耗内存或”切换过度“而导致系统资源步子
+如果在一个JVM里面创建太多线程，可能会使系统由于过度消耗内存或”切换过度“而导致系统资源紧张。
 
 为了解决这个问题，就有了线程池的概念，线程池的核心逻辑是提前创建好若干个线程放在一个容器中。如果有任务需要处理，则将任务直接分配给线程池中的线程来执行就行，任务处理完以后这个线程不会被销毁，而是等待后续分配任务，同时通过线程池来重复管理线程还可以避免创建大量线程增加开销。
 
@@ -55,7 +53,7 @@ public class ThreadPoolTest implements Runnable {
 
 ### 线程池API
 
-为了方便大家对于线程池的使用，在Executors里面提供了几个线程池的工厂方法，这样，很多新手就不需要了解太多关于ThreadPoolExecutor的只是了，它们值需要直接使用Executors的工厂方法，就可以使用线程池。
+为了方便大家对于线程池的使用，在Executors里面提供了几个线程池的工厂方法，这样，很多新手就不需要了解太多关于ThreadPoolExecutor的知识了，它们只需要直接使用Executors的工厂方法，就可以使用线程池。
 
 Executors提供的工厂方法：
 
@@ -66,9 +64,9 @@ Executors提供的工厂方法：
 
 ### ThreadPoolExecutor
 
-上面提到的四种线程池的构建，都是基于ThreadPoolExecutor来构建的，接下来将一起了解一下面试官最喜欢问道的一道面试题”请简单说下你知道的线程池和ThreadPoolThread有哪些构造参数“。
+上面提到的四种线程池的构建，都是基于ThreadPoolExecutor来构建的，**接下来将一起了解一下面试官最喜欢问道的一道面试题”请简单说下你知道的线程池和ThreadPoolThread有哪些构造参数“。**
 
-ThreadPoolExecutor有多个重载的构造方法，我们可以基于它最完整的狗仔方法来分析，先来解释一下每个参数的作用，稍后我们再发恩熙源码的过程中再来详细了解参数的意义。
+ThreadPoolExecutor有多个重载的构造方法，我们可以基于它最完整的构造方法来分析，先来解释一下每个参数的作用，稍后我们再分析源码的过程中再来详细了解参数的意义。
 
 ```java
 public ThreadPoolExecutor(int corePoolSize,// 核心线程数
@@ -98,7 +96,7 @@ FixedThreadPool的核心线程数和最大线程数都是指定值，也就是�
 
 1. 线程数少于核心线程数，也就是设置的线程数时，新建线程执行任务。
 2. 线程数等于核心线程数后，将任务加入阻塞队里。
-3. 由于对量容量非常大，可以一直添加
+3. 由于队列容量非常大，可以一直添加
 4. 执行完任务的线程反复去队列中去任务执行
 
 用途：FixedThreadPool用于负载比较大的服务器，为了资源的合理利用，需要限制当前线程数量。
@@ -113,7 +111,7 @@ public static ExecutorService newCachedThreadPool() {
 }
 ```
 
-CachedThreadPool创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。并且没有核心线程，非核心线程数无上限，但是每个空闲的事件只有60秒，超过后就会被回收。
+CachedThreadPool创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。并且没有核心线程，非核心线程数无上限，但是每个空闲的时间只有60秒，超过后就会被回收。
 
 它的执行流程如下：
 
@@ -152,7 +150,7 @@ ScheduledThreadPollExeutor继承了ThreadPoolExecutor，并另外提供一些调
 
 ### execute
 
-基于元am入口进行分析，先看execute方法：
+基于源码入口进行分析，先看execute方法：
 
 ```java
 public void execute(Runnable command) {
@@ -231,9 +229,9 @@ private static final int TERMINATED =  3 << COUNT_BITS;// terminated()方法执�
 
 ### addWorker
 
-如果工作线程数下雨核心线程数的话，会调用addWorker，顾名思义，其实就是要创建一个工作线程。我们来看看源码的实现。
+如果工作线程数小于核心线程数的话，会调用addWorker，顾名思义，其实就是要创建一个工作线程。我们来看看源码的实现。
 
-源码比较常，咳起来比较唬人，其实就做了两件事：
+源码比较长，看起来比较唬人，其实就做了两件事：
 
 1. 自循环CAS操作来将线程数+1。
 2. 新建一个线程并启用。
@@ -355,7 +353,7 @@ lock方法一旦获取了独占锁，表示当前线程正在执行任务中，�
 
 3. 线程池在执行shutdown方法或者tryTerminate方法时会调用**interruptIdleWorkers**方法来中断空闲的线程，interruptIdleWorkers方法会使用tryLock方法来判断线程池中的线程是否是空闲状态。
 
-4. 之所以这只为不可重入，是因为我们不希望任务在调用像setCorePoolSize这样的线程池控制方法时重新获取锁，这样会中断正在运行的线程。
+4. 之所以设置为不可重入，是因为我们不希望任务在调用像setCorePoolSize这样的线程池控制方法时重新获取锁，这样会中断正在运行的线程。
 
 5. 
 
@@ -371,7 +369,7 @@ lock方法一旦获取了独占锁，表示当前线程正在执行任务中，�
        private static final long serialVersionUID = 6138294804551838833L;
    
        /** Thread this worker is running in.  Null if factory fails. */
-       // 注意了，这才是真正执行task的线程，从构造函数可知是由ThreadFactury创建的
+       // 注意了，这才是真正执行task的线程，从构造函数可知是由ThreadFactory创建的
        final Thread thread;
        /** Initial task to run.  Possibly null. */
        // 这就是需要执行的 task
@@ -565,7 +563,7 @@ private Runnable getTask() {
         boolean timed = allowCoreThreadTimeOut || wc > corePoolSize;
 
         // 1.线程数量超过maximumPoolSize可能是线程池在运行时被调用了setMaximumPoolSize()被改变了大小，否则已经addWorker()成功不会超过maximumPoolSize
-        // 2.timed && timedOut如果为true，表示当前操作需要进行超时控制，并且上次从阻塞队列中 获取任务发生了超时.其实就是体现了空闲线程的存活时间
+        // 2.timed && timedOut如果为true，表示当前操作需要进行超时控制，并且上次从阻塞队列中获取任务发生了超时.其实就是体现了空闲线程的存活时间
         if ((wc > maximumPoolSize || (timed && timedOut))
             && (wc > 1 || workQueue.isEmpty())) {
             if (compareAndDecrementWorkerCount(c))
@@ -590,7 +588,7 @@ private Runnable getTask() {
 }
 ```
 
-这里z红药的地方是第二个if判断，目的是控制线程池的有效线程数量。由上文中的分析可以知道，在执行execute方法时，如果当前线程池的线程数量超过corePoolSize且小于maximumPoolSize，并且workQueue已满时，则可以增加工作线程，但这时如果超时没有获取到任务，也就是timedOut为true的情况，说明workQueue已经为空了，也就说明了当前线程池中不需要那么多线程来执行任务了，可以把多出corePoolSize数量的线程销毁掉，保持线程数量在corePoolSize即可。
+这里最重要的的地方是第二个if判断，目的是控制线程池的有效线程数量。由上文中的分析可以知道，在执行execute方法时，如果当前线程池的线程数量超过corePoolSize且小于maximumPoolSize，并且workQueue已满时，则可以增加工作线程，但这时如果超时没有获取到任务，也就是timedOut为true的情况，说明workQueue已经为空了，也就说明了当前线程池中不需要那么多线程来执行任务了，可以把多出corePoolSize数量的线程销毁掉，保持线程数量在corePoolSize即可。
 
 什么时候会销毁？当然是runWorker方法执行完之后，也就是Worker中的run方法执行完，由JVM自动回收。
 
@@ -655,7 +653,7 @@ public void execute(Runnable command) {
 
 ### 阿里开发手册不建议使用线程池
 
-手册上说：线程池的构建不允许使用Executors去创建，而是通过ThreadPoolExecutor方式。用Executors使得用户不需要关心线程池的参数配置，意味着大家对于线程池的运行规则也会慢慢忽略。这会导致一个问题，比如我们用newFixedThareadPool或者singleThreadPool。允许的队列长度为Integer.MAX_VALUE，如果使用不当会导致大量请求堆积到队列中导致OOM的风向而newChacedThreadPool，允许创建线程数量为Integer.MAX_VALUE，也可能会导致大量线程的创建出现CPU使用过高或者OOM的问题。
+手册上说：线程池的构建不允许使用Executors去创建，而是通过ThreadPoolExecutor方式。用Executors使得用户不需要关心线程池的参数配置，意味着大家对于线程池的运行规则也会慢慢忽略。这会导致一个问题，比如我们用newFixedThareadPool或者singleThreadPool。允许的队列长度为Integer.MAX_VALUE，如果使用不当会导致大量请求堆积到队列中导致OOM的风险而newChacedThreadPool，允许创建线程数量为Integer.MAX_VALUE，也可能会导致大量线程的创建出现CPU使用过高或者OOM的问题。
 
 如果我们通过ThreadPoolExecutor来构造线程池的话，我们势必要了解线程池构造中每个参数的具体含义，使得开发者在配置阐述的时候能够更加谨慎。不至于在面试的时候被问到：构造一个线程池需要哪些参数，都回答不上了。
 
@@ -697,7 +695,7 @@ shutdownNow()：立即终止线程池，并尝试打断正在执行的任务，�
 
 ThreadPoolExecutor童工了动态调整线程池容量大小的方法：
 
-- setCorePoolSize()和setMaximumPoolSize()，setCorePoolSize：这只核心池大小。
+- setCorePoolSize()和setMaximumPoolSize()，setCorePoolSize：设置核心池大小。
 - setMaximumPoolSize：设置线程池最大能创建的线程数目大小。
 
 ### 任务缓存队列及排队策略
@@ -712,7 +710,7 @@ workQueue的类型为BolckingQueue，通常可以取下面三种类型：
 
 ### 线程池的监控
 
-如果在项目中大规模的使用了线程池，那么必须要有一套监控体系，来指导当前线程池的状态，当出现问题的时候可以快速定位到问题。而线程池提供了相应的扩展方法，我们通过重写线程池的beforeExecute、afterExecute和shutdown等方式就可以实现对线程的监控，简单给大家演示一个案例：
+如果在项目中大规模的使用了线程池，那么必须要有一套监控体系，来指导当前线程池的状态，当出现问题的时候可以快速定位到问题。**而线程池提供了相应的扩展方法，我们通过重写线程池的beforeExecute、afterExecute和shutdown等方式就可以实现对线程的监控**，简单给大家演示一个案例：
 
 ```java
 public class ThreadPoolDemo extends ThreadPoolExecutor {
@@ -818,7 +816,7 @@ public class CallableDemo implements Callable<String> {
 
 这个在很多地方有用到，比如Dubbo的异步调用，比如消息中间件的异步通信等等。
 
-利用FutureTask、Callable、Thread对耗时任务（如查询数据库）做预处理，在需要计算记过之前就启动计算。
+**利用FutureTask、Callable、Thread对耗时任务（如查询数据库）做预处理，在需要计算结果之前就启动计算。**
 
 所以我们来看一下Future/Callable是如何实现的。
 
@@ -886,7 +884,7 @@ public interface Future<V> {
 
 分析到这里我们其实有一些头绪了，FutureTask是Runnable和Future的结合，如果我们把Runnable比作是生产者，Future比作是消费者，那么FutureTask是被这两者共享的，生产者运行run方法计算结果，消费者通过get方法获取结果。
 
-作为生产者消费者模式，有一个很重要的机制，就是如果生产者数据还没准备的时候，消费者会被阻塞。当生产者数据准备好了以后会唤醒消费者继续执行。
+**作为生产者消费者模式，有一个很重要的机制，就是如果生产者数据还没准备的时候，消费者会被阻塞**。当生产者数据准备好了以后会唤醒消费者继续执行。
 
 这个有点像我们上次分析的阻塞队列，那么在FutureTask里面是基于什么方式实现的呢？
 

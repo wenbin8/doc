@@ -99,4 +99,4 @@ static final class NonfairSync extends Sync {
 }
 ```
 
-由于后面的代码和 CountDownLatch 的是完全一样，都是 基于共享锁的实现，所以也就没必要再花时间来分析了。 
+由于后面的代码和 CountDownLatch 的是完全一样，都是基于共享锁的实现，所以也就没必要再花时间来分析了。 

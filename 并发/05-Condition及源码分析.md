@@ -274,7 +274,7 @@ final boolean transferForSignal(Node node) {
 
 执行完doSignal以后，会把condition队列中的节点转移到aqs队列上，逻辑结构图如下：
 
-这个时候会判断ThreadA的prev节点也就是head节点的waitStatus，如果大于0或者设置SIGNAL失败，表示节点被设置成了CANCELLED状态，这个时候回唤醒Thread这个线程。否则就基于AQS队列的机制来唤醒，也就是等到ThreadB释放锁之后来唤醒ThreadA。
+这个时候会判断ThreadA的prev节点也就是head节点的waitStatus，如果大于0或者设置SIGNAL失败，表示节点被设置成了CANCELLED状态，这个时候会唤醒Thread这个线程。否则就基于AQS队列的机制来唤醒，也就是等到ThreadB释放锁之后来唤醒ThreadA。
 
 ![image-20191015151900934](assets/image-20191015151900934.png)
 
@@ -337,7 +337,7 @@ final boolean transferAfterCancelledWait(Node node) {
 
 这里需要注意的地方是，如果第一次CAS失败了，则不能判断当前线程是先进行了中断还是先进行了signal方法的调用，可能是先执行了signal然后中断，也可能是先执行了中断，后执行了signal。当然，这两个操作肯定是发生在CAS之前。这时候需要做的就是等待当前线程的node被添加到AQS队列后，也就是enq方法返回后，返回false告诉checkInterrputWhileWaiting方法返回REINTERRUPT(1)，后续进行重新中断。
 
-简单来说，该方法的返回值代表当前线程是否在pard的时候被中断唤醒，如果为true表示中断在signai调用之前，signal还未执行，那么这个时候根据await的语义，在await时遇到中断需要抛出InterrputException，返回true就是告诉checkInterputWhileWaiting返回THROW_IE(-1)。如果返回false，否则表示signal已经执行过了，只需要重新相应中断即可。
+简单来说，该方法的返回值代表当前线程是否在park的时候被中断唤醒，如果为true表示中断在signai调用之前，signal还未执行，那么这个时候根据await的语义，在await时遇到中断需要抛出InterrputException，返回true就是告诉checkInterputWhileWaiting返回THROW_IE(-1)。如果返回false，否则表示signal已经执行过了，只需要重新相应中断即可。
 
 #### acquireQueued
 

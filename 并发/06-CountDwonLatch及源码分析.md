@@ -1,6 +1,6 @@
 # CountDwonLatch及源码分析
 
-countDownLatch是一个同步工具类，它允许一个或多个线程一致等待，知道其他线程的操作执行完毕在执行。从命名可以解毒到countDown是倒数的意思，类似我们的倒计时的概念。
+countDownLatch是一个同步工具类，它允许一个或多个线程一直等待，直到其他线程的操作执行完毕在执行。从命名可以解读到countDown是倒数的意思，类似我们的倒计时的概念。
 
 CountDownLatch提供了两个方法，一个是countDown，一个是await，CountDownLatch初始化的时候需要传入一个整数，在这个整数倒数到0之前，调用了await方法的程序都必须要等待，然后通过countDown来倒数。
 
@@ -35,6 +35,8 @@ public class CountDownLatchDemo {
     }
 }
 ```
+
+
 
 从代码的实现来看，优点类似join的功能，但是比jion更加灵活。CountDownLatch构造函数会接收一个int类型的参数作为计数器的初始值，当调用CountDownLatch的countDown方法时，这个计数器就会减一。
 
@@ -72,7 +74,7 @@ public class CountDownLatchDemo2 extends Thread {
 }
 ```
 
-总的来说，凡事设计到需要指定某个人物在执行之前，要等到前置任务执行完毕之后才执行的场景，都可以使用CountDownLatch。
+总的来说，**凡是涉及到需要指定某个任务在执行之前，要等到前置任务执行完毕之后才执行的场景，都可以使用CountDownLatch。**
 
 ## CountDownLatch源码分析
 
@@ -80,11 +82,13 @@ public class CountDownLatchDemo2 extends Thread {
 
 对于CountDownLatch，我们仅仅需要关心两个方法，一个是countDown()方法，另一个是await()方法。
 
-countDown()方法每次调用都会将state减1，知道state的值为0；而await是一个阻塞方法，当state减为0的时候，await方法才会返回。await可以被多个线程调用，大家在这个时候脑子里要有个图：所有调用了await方法的线程阻塞在AQS的阻塞队列中，等待条件满足（state==0）。将线程从队列中一个个唤醒过来。
+countDown()方法每次调用都会将state减1，直到state的值为0；
+
+而await是一个阻塞方法，当state减为0的时候，await方法才会返回。await可以被多个线程调用，大家在这个时候脑子里要有个图：所有调用了await方法的线程阻塞在AQS的阻塞队列中，等待条件满足（state==0）。将线程从队列中一个个唤醒过来。
 
 ### acquireSharedInterputibly
 
-countDownLatch也用到了AQS，在CountDownLatch内部写了一个Sync并且继承了AQS这个抽象类重写了AQS中的共享锁方法。首先看到下面这个代码，这块代码主要是判断当前线程是否获取到了共享锁。（在CountDownLatch中，使用的共享锁机制，因为CountDownLatch并不需要实现互斥特性）
+countDownLatch也用到了AQS，在CountDownLatch内部写了一个Sync并且继承了AQS这个抽象类重写了AQS中的共享锁方法。首先看到下面这个代码，这块代码主要是判断当前线程是否获取到了共享锁。（**在CountDownLatch中，使用的共享锁机制，因为CountDownLatch并不需要实现互斥特性**）
 
 ```java
 public void await() throws InterruptedException {
@@ -107,7 +111,7 @@ public final void acquireSharedInterruptibly(int arg)
 
 1. addWaiter设置为shared模式。
 2. tryAcquire和tryAcquireShared的返回值不同，因此会多出一个判断过程。
-3. 在判断前驱节点是头节点后，调用了setHeadAndPropagate方法，而不是简单的更新一下头节点
+3. 在判断前驱节点是头节点后，调用了setHeadAndPropagate方法，而不是简单的更新一下头节点。
 
 ```java
 private void doAcquireSharedInterruptibly(int arg)
@@ -173,10 +177,13 @@ protected boolean tryReleaseShared(int releases) {
     // Decrement count; signal when transition to zero
     for (;;) {
         int c = getState();
+        // 如果获取到的state就是0则证明已经被别的线程释放锁
         if (c == 0)
             return false;
         int nextc = c-1;
+        // CAS操作如果成功
         if (compareAndSetState(c, nextc))
+            // 判断state是否0，如果是0返回true
             return nextc == 0;
     }
 }
