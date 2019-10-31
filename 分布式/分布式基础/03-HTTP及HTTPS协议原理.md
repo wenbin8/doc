@@ -401,9 +401,12 @@ CA机构有自己的公钥，**CA会只用自己的公私钥对证书申请者�
 server {
     listen 443 ssl;
     ssl on;
-    ssl_certificate cert/mycert.crt; ssl_certificate_key cert/privatekey.key;
-    ssl_session_cache shared:SSL:1m; ssl_session_timeout 5m;
-    ssl_ciphers HIGH:!aNULL:!MD5; ssl_prefer_ser ver_ciphers on;
+    ssl_certificate cert/mycert.crt; 
+    ssl_certificate_key cert/privatekey.key;
+    ssl_session_cache shared:SSL:1m; 
+    ssl_session_timeout 5m;
+    ssl_ciphers HIGH:!aNULL:!MD5; 
+    ssl_prefer_ser ver_ciphers on;
     location / {
         root html;
         index index.html index.htm; 
@@ -415,13 +418,13 @@ server {
 
 x.509标准的证书，有两种编码格式，一种是PEM、一种是DER。
 
-但实际上我们的创和私钥的时候，并不一定要以EM或者DER作为扩展名。
+但实际上我们在创建证书和私钥的时候，并不一定要以PEM或者DER作为扩展名。
 
 比如证书的表示方式有：PEM、DER、CRT、CER
 
 私钥或者公钥的标识形式：PEM、DER、KEY
 
-只是对应的编码格式不同而已
+只是对应的编码格式不同而已。
 
 ### nginx添加https支持
 
