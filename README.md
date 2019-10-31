@@ -75,7 +75,7 @@ Spring:
 - [x] [分布式架构演进](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/01-分布式架构演进.md)
 - [x] [通信协议Tcp/ip](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/02-通信协议总结-TCPIP.md)
 - [x] [HTTP及HTTPS协议原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/03-HTTP及HTTPS协议原理.md)
-- [ ] 序列化与反序列化
+- [x] 序列化与反序列化
 
 #### 分布式协调服务
 
