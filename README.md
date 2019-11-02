@@ -2,6 +2,8 @@
 
 
 
+
+
 一步一步建立起从分布式到服务化在到云原生的一套完整技术栈.
 
 ### Java8
@@ -75,7 +77,7 @@ Spring:
 - [x] [分布式架构演进](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/01-分布式架构演进.md)
 - [x] [通信协议Tcp/ip](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/02-通信协议总结-TCPIP.md)
 - [x] [HTTP及HTTPS协议原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/03-HTTP及HTTPS协议原理.md)
-- [x] 序列化与反序列化
+- [x] [序列化与反序列化](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/04-序列化和反序列化.md)
 
 #### 分布式协调服务
 
@@ -96,12 +98,14 @@ Spring:
 - [ ] MongoDB
 - [ ] Redis
 
-
 ### 微服务(Spring boot/Spring Cloud)
+
+- [x] 微服务的发展
 
 #### Spring Boot
 
-- [ ] 自动配置\起步依赖\Actuator
+- [ ] Spring Boot自动装配机制的原理
+- [ ] Spring Boot核心原理
 
 #### Spring Cloud
 
@@ -116,6 +120,8 @@ Spring:
 - [ ] Spring Boot 与 Spring Cloud 整合
 
 ### 云原生
+
+
 
 #### Docker
 
