@@ -104,8 +104,11 @@ Spring:
 
 #### Spring Boot
 
-- [ ] Spring Boot自动装配机制的原理
-- [ ] Spring Boot核心原理
+- [ ] Spring Boot的基本认识
+- [ ] Spring Boot嵌入式Web容器
+- [ ] Spring Boot Actuator
+- [ ] Spring Boot自动装配
+- [ ] Spring Boot理解SpringApplication
 
 #### Spring Cloud
 
