@@ -44,6 +44,49 @@ zookeeper有两种运行模式：集群模式和单机模式。
 
 3. 启动zookeeper。
 
+### Docker Compose 部署
+
+docker机器上新建文件：stack.yml，将项目内容复制到yml文件中。
+
+```
+services:
+  zoo1:
+    image: zookeeper
+    restart: always
+    hostname: zoo1
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+  zoo2:
+    image: zookeeper
+    restart: always
+    hostname: zoo2
+    ports:
+      - 2182:2181
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+  zoo3:
+    image: zookeeper
+    restart: always
+    hostname: zoo3
+    ports:
+      - 2183:2181
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+```
+
+然后使用命令 ```docker-compose -f stack.yml up```
+
+如果没有安装docker-compose 参考docker的官方文档：https://docs.docker.com/compose/install/
+
+等待启动完成后使用：./zkCli.sh -server 宿主机IP:2181 即可登录。
+
 ### 常用命令
 
 启动ZK服务: 

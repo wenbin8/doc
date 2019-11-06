@@ -83,7 +83,7 @@ Spring:
 
 zookeeper:
 
-- [ ] zookeeper的安装部署
+- [ ] [zookeeper的安装部署](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/01-zookeeper的安装部署.md)
 - [ ] zookeeper应用实战
 - [ ] zookeeper的Leader选举原理
 - [ ] zookeeper的watcher机制原理
