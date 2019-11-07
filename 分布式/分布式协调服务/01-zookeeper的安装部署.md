@@ -46,6 +46,8 @@ zookeeper有两种运行模式：集群模式和单机模式。
 
 ### Docker Compose 部署
 
+参考在https://hub.docker.com中搜索zookeeper在镜像介绍中又使用docker镜像安装单机和集群环境的详细说明。
+
 docker机器上新建文件：stack.yml，将项目内容复制到yml文件中。
 
 ```
