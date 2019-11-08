@@ -1,10 +1,6 @@
-[](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/02-zookeeper总结.md)
 
 
-
-
-
-一步一步建立起从分布式到服务化在到云原生的一套完整技术栈.
+一步一步建立起从分布式系统从SOA->微服务->云原生的一套完整技术栈.
 
 ### Java8
 
@@ -81,15 +77,22 @@ Spring:
 
 #### 分布式协调服务
 
+- [ ] 分布式系统与一致性协议
+
 zookeeper:
 
 - [x] [zookeeper的安装部署](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/01-zookeeper的安装部署.md)
 - [x] [Zookeeper总结](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/02-zookeeper总结.md)
 - [x] [zookeeper应用](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/03-zookeeper应用.md)
 - [x] [zookeeper基于Curator实现分布式锁](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/04-zookeeper基于Curator实现分布式锁.md)
-- [ ] zookeeper实现Leader选举
+- [x] [zookeeper实现Leader选举](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/05-zookeeper实现Leader选举.md)
 - [ ] zookeeper的Leader选举原理
 - [ ] zookeeper的watcher机制原理
+
+etcd:
+- [ ] etcd安装部署
+- [ ] raft协议
+
 
 #### 分布式服务治理
 
