@@ -86,6 +86,8 @@ zookeeper:
 - [x] [zookeeper的安装部署](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/01-zookeeper的安装部署.md)
 - [x] [Zookeeper总结](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/02-zookeeper总结.md)
 - [x] [zookeeper应用](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/03-zookeeper应用.md)
+- [ ] zookeeper基于Curator实现分布式锁
+- [ ] zookeeper实现Leader选举
 - [ ] zookeeper的Leader选举原理
 - [ ] zookeeper的watcher机制原理
 

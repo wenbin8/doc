@@ -1,4 +1,4 @@
-# zookeeper应用实战
+# zookeeper应用
 
 针对zookeeper，比较常用的Java客户端有zkclient、curator。由于Curator对于zookeeper的抽象层次比较高，简化了zookeeper客户端的开发量。使得curator逐步被广泛应用。
 
@@ -327,14 +327,6 @@ public class WatcherDemo {
 ![image-20191107211247592](assets/image-20191107211247592.png)
 
 ![image-20191107211256637](assets/image-20191107211256637.png)
-
-## 基于Curator实现分布式锁
-
-### 分布式锁的基本场景
-
-
-
-## 使用zookeeper实现leader选举
 
 
 
