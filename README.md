@@ -81,11 +81,11 @@ Spring:
 
 zookeeper:
 
-- [x] [zookeeper的安装部署](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/01-zookeeper的安装部署.md)
-- [x] [Zookeeper总结](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/02-zookeeper总结.md)
-- [x] [zookeeper应用](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/03-zookeeper应用.md)
-- [x] [zookeeper基于Curator实现分布式锁](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/04-zookeeper基于Curator实现分布式锁.md)
-- [x] [zookeeper实现Leader选举](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/05-zookeeper实现Leader选举.md)
+- [x] [zookeeper的安装部署](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/01-zookeeper的安装部署.md)
+- [x] [Zookeeper总结](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/02-zookeeper总结.md)
+- [x] [zookeeper应用](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/03-zookeeper应用.md)
+- [x] [zookeeper基于Curator实现分布式锁](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/04-zookeeper基于Curator实现分布式锁.md)
+- [x] [zookeeper实现Leader选举](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/05-zookeeper实现Leader选举.md)
 - [ ] zookeeper的Leader选举原理
 - [ ] zookeeper的watcher机制原理
 
