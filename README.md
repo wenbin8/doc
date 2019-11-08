@@ -77,7 +77,7 @@ Spring:
 
 #### 分布式协调服务
 
-- [ ] 分布式系统与一致性协议
+- [x] [分布式系统与一致性协议](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/分布式系统与一致性协议.md)
 
 zookeeper:
 
