@@ -75,6 +75,22 @@ Spring:
 - [x] [HTTP及HTTPS协议原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/03-HTTP及HTTPS协议原理.md)
 - [x] [序列化与反序列化](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/04-序列化和反序列化.md)
 
+
+
+#### 微服务(Spring boot/Spring Cloud)
+
+- [x] [微服务的发展](https://github.com/wenbin8/doc/blob/master/微服务/微服务的发展.md)
+
+##### Spring Boot
+
+- [x] [Spring Boot的基本认识](https://github.com/wenbin8/doc/blob/master/微服务/SpringBoot/01-Spring%20Boot的基本认识.md)
+- [ ] Spring Boot嵌入式Web容器
+- [ ] Spring Boot Actuator
+- [ ] Spring Boot自动装配
+- [ ] Spring Boot理解SpringApplication
+
+
+
 #### 分布式协调服务
 
 - [x] [分布式系统与一致性协议](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/分布式系统与一致性协议.md)
@@ -92,37 +108,22 @@ zookeeper:
 etcd:
 - [ ] etcd安装部署
 - [ ] raft协议
-
+- [ ] V2 API
+- [ ] V3 API
 
 #### 分布式服务治理
 
-- [ ] Dubbo
+##### Spring Cloud
 
-#### 分布式消息通信
+###### alibaba:
 
-- [ ] kafka
-- [ ] rabbitMQ
+Dubbo：
 
-#### 分布式缓存
+- [ ] Dubbo的基本认识
+- [ ] nacos
+- [ ] Sentinel
 
-- [ ] MongoDB
-- [ ] Redis
-
-### 微服务(Spring boot/Spring Cloud)
-
-- [x] [微服务的发展](https://github.com/wenbin8/doc/blob/master/微服务/微服务的发展.md)
-
-#### Spring Boot
-
-- [x] [Spring Boot的基本认识](https://github.com/wenbin8/doc/blob/master/微服务/SpringBoot/01-Spring%20Boot的基本认识.md)
-- [ ] Spring Boot嵌入式Web容器
-- [ ] Spring Boot Actuator
-- [ ] Spring Boot自动装配
-- [ ] Spring Boot理解SpringApplication
-
-#### Spring Cloud
-
-netfilx:
+###### netfilx:
 
 - [ ] Eureka注册中心
 - [ ] Ribbon 负载均衡
@@ -134,13 +135,19 @@ netfilx:
 - [ ] BUS 消息总线
 - [ ] Spring Boot 与 Spring Cloud 整合
 
-alibaba:
+#### 分布式消息通信
 
-### 云原生
+- [ ] kafka
+- [ ] rabbitMQ
 
+#### 分布式缓存
 
+- [ ] MongoDB
+- [ ] Redis
 
-#### Docker
+#### 云原生
+
+##### Docker
 
 - [ ] 理解docker实现原理(内核支持,和联合文件系统)
 - [ ] docker镜像和镜像仓库
@@ -150,5 +157,5 @@ alibaba:
 - [ ] dockerfile的使用
 - [ ] docker Compose 
 
-#### K8S
+##### K8S
 
