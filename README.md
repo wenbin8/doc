@@ -103,7 +103,7 @@ zookeeper:
 - [x] [zookeeper基于Curator实现分布式锁](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/04-zookeeper基于Curator实现分布式锁.md)
 - [x] [zookeeper实现Leader选举](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/05-zookeeper实现Leader选举.md)
 - [x] [zookeeper的Leader选举原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/06-zookeeper的Leader选举原理.md)
-- [ ] zookeeper的watcher机制原理
+- [x] [zookeeper的watcher机制原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/zookeeper/07-zookeeper的watcher机制原理.md)
 
 etcd:
 - [ ] etcd安装部署
