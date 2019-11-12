@@ -9,7 +9,7 @@
 
 BeanFactory接口定义了Spring IOC容器的基本功能规范，是Spring IOC容器所应遵守的最底层和最基本的编程规范。BeanFactory接口中定义了几个getBean()方法，就是用户向IOC容器索取管理的Bean的方法，就是用户向IOC索取管理的Bean方法，我们通过分析其子类的具体实现，理解Spring IOC容器在用户索取Bean时如何完成依赖注入。
 
-![image-20190925081119271](/Users/dongwenbin/github/doc/Spring/assets/image-20190925081119271.png)
+![image-20190925081119271](assets/image-20190925081119271.png)
 
 在BeanFactory中我们可以看到getBean(String...)方法，但它具体实现在AbstractBeanFactory中。
 

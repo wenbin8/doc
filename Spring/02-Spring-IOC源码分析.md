@@ -30,7 +30,7 @@
 
 Spring Bean的创建是典型的工厂模式，这一系列的Bean工厂，也即IOC容器为开发者管理对象间的依赖关系提供了很多便利和基础服务，在Spring中又许多的IOC容器的实现供用户选择和使用，其相互关系如下：
 
-![image-20190923115938948](/Users/dongwenbin/github/doc/Spring/assets/image-20190923115938948.png)
+![image-20190923115938948](assets/image-20190923115938948.png)
 
 其中BeanFacotry作为最顶层的一个接口类，它定义了IOC容器的基本功能规范，BeanFactory有三个重要的子类：ListAbleBeanFactory、HierarchicalBeanFactory和AutowireCapableBeanFactory。但是从类图中我们可以发现最终的默认实现是DefaultListableBeanFactory，它实现了所有的接口。那为何要定义这么多层次的接口呢？查阅这些接口的源码和说明发现，每个接口都有它的使用场合，它主要是为了区分在Spring内部在操作过程中对象的传递和转化过程时，对对象的数据访问所做的限制。例如LIstableBeanFactory接口表示这些Bean是可列表化的，而HierarchcalBeanFacotry表示的是这些Bean是有继承关系的，也就是每个Bean有可能有父Bean。AutowireCapableBeanFactory接口定义Bean自动装配规则。这三个接口共同定义了Bean的集合、Bean之间的关系、以及Bean行为。
 
@@ -91,7 +91,7 @@ public interface BeanFactory {
 
 其继承体系如下：
 
-![image-20190923122013684](/Users/dongwenbin/github/doc/Spring/assets/image-20190923122013684.png)
+![image-20190923122013684](assets/image-20190923122013684.png)
 
 ### BeanDefinitionReader
 
@@ -99,7 +99,7 @@ Bean的解析过程非常复杂，功能被分的很细，因为这里需要被�
 
 Spring中BeanDefinitionReader的类结构图：
 
-![image-20190923123332675](/Users/dongwenbin/github/doc/Spring/assets/image-20190923123332675.png)
+![image-20190923123332675](assets/image-20190923123332675.png)
 
 抛开一切细节总结IOC一下加载流程：ResourceLoader将资源路径转换为resouce对象.BeanDefinitionReader使用resouce对象将配置转换为definition对象。并注册到DefaultListableBeanFactory中的beanDefinitionMap属性中。DI根据beanDefinitionMap中的BeanDefinition对象中记录的bean信息进行实例化bean。
 
@@ -107,7 +107,7 @@ Spring中BeanDefinitionReader的类结构图：
 
 **IOC容器的初始化包括BeanDefinition的Resource定位、加载和注册这三个基本的过程。**我们以ApplicationContext为例，ApplicationContext系列容器也许是我们最熟悉的，因为Web项目中适用的XmlWebApplicationContext就属于这个继承体系，还有ClasspathXmlApplicationContext等，其继承体系如下图：
 
-![image-20190923132630109](/Users/dongwenbin/github/doc/Spring/assets/image-20190923132630109.png)
+![image-20190923132630109](assets/image-20190923132630109.png)
 
 **ApplicationContext允许上下文嵌套，通过保存父上下文可以维持一个上下文体系。对于Bean的查找可以在这个上下文体系中发生，首先检查当前上下文，其次是父上下文，逐级向上，这样为不同的Spring应用提供了一个共享的Bean定义环境。**
 
@@ -530,7 +530,7 @@ AbstractRefreshableConfigApplicationContext的loadBeanDefinitions(Resource... re
 
 首先，调用资源加载器的获取资源方法resourceLoader.getResource(location)，获取到要加载的资源。其次，真正执行加载功能是其子类XmlBeanDefinitionReader的loadBeanDefinitions()方法。在loadBeanDefinitions()方法中调用了AbstractApplictionContext的getResources()方法，跟进去后发现getResources()方法其实定义在ResourcePatternResolver中，此时，我们有必要来看一下ResourcePatternResolver的圈类图：
 
-![image-20190923145622894](/Users/dongwenbin/github/doc/Spring/assets/image-20190923145622894.png)
+![image-20190923145622894](assets/image-20190923145622894.png)
 
 从上面可以看到ResourceLoder与ApplicationContext的继承关系，可以看出其实际调用的是DefaultResourceLoader中的getSource()方法定位Resource，因为ClassPathXmlApplicationContext本省就的DefaultResourceLoader的实现类，所以此时又回到了ClassPathXmlApplicationContext中。
 

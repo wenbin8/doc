@@ -44,7 +44,7 @@ AOP编程的常用场景有：Authentication(权限认证)、Auto Caching(自动
 
 Spring总共大约有20个模块，由1300多个不同的文件构成。而这些组件被分别整合在核心容器（Core Container）、AOP（Aspect Oriented Programming）和设备支持（Instrmentation）、数据访问及集成（Data Access/Integeration）、Web、报文发送（Messaging）、Test，6个体模块集合中。以下是Spring5的模块结构图：
 
-![image-20190920161749806](/Users/dongwenbin/github/doc/Spring/assets/image-20190920161749806.png)
+![image-20190920161749806](assets/image-20190920161749806.png)
 
 组成Spring框架的每个模块集合或者模块都可以单独存在，也可以一个或多个模块联合实现。
 
@@ -114,11 +114,11 @@ spring-jms模块（Java Messaging Service）能够发送和接受信息，自Spr
 
 Spring 官网对 Spring5 各模块之间的关系也做了详细说明:
 
-![image-20190920173044052](/Users/dongwenbin/github/doc/Spring/assets/image-20190920173044052.png)
+![image-20190920173044052](assets/image-20190920173044052.png)
 
 对 Spring5 各模块做了一次系统的总结，描述模块之间的依赖关系，希望能对小伙伴们有所 帮助。
 
-![image-20190920173110832](/Users/dongwenbin/github/doc/Spring/assets/image-20190920173110832.png)
+![image-20190920173110832](assets/image-20190920173110832.png)
 
 ## Spring源码构建
 
@@ -156,12 +156,12 @@ dongwenbindeMacBook-Pro:spring-framework-5.0.2.RELEASE dongwenbin$
 
 ### 导入代码
 
-![image-20190920174210839](/Users/dongwenbin/github/doc/Spring/assets/image-20190920174210839.png)
+![image-20190920174210839](assets/image-20190920174210839.png)
 
-![image-20190920173738844](/Users/dongwenbin/github/doc/Spring/assets/image-20190920173738844.png)
+![image-20190920173738844](assets/image-20190920173738844.png)
 
 点击next
 
-![image-20190920173906663](/Users/dongwenbin/github/doc/Spring/assets/image-20190920173906663.png)
+![image-20190920173906663](assets/image-20190920173906663.png)
 
 等待构建完成，在网络良好的情况下大约需要 10 分钟便可自动构建完成。
