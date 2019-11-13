@@ -50,6 +50,10 @@ Dubbo是阿里巴巴内部使用的一个分布式服务治理框架，2012年�
 
 基于dubbo最新版本2.7.2的版本来讲解按照国际惯例，我们还是基于一个 demo，使用 dubbo 完成基本的远程通信。 
 
+程序源码地址：https://github.com/wenbin8/myCode/tree/master/dubbo-demo-client
+
+https://github.com/wenbin8/myCode/tree/master/dubbo-demo-server
+
 ### 创建两个项目
 
 创建一个server项目和一个client项目
