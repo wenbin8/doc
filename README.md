@@ -117,7 +117,8 @@ etcd:
 
 Dubbo：
 
-- [ ] [服务治理之Apache Dubbo的基本认识](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/01-服务治理之Apache%20Dubbo的基本认识.md)
+- [x] [服务治理之Apache Dubbo的基本认识](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/01-服务治理之Apache%20Dubbo的基本认识.md)
+- [x] Apache Dubbo的服务治理功能
 - [ ] nacos
 - [ ] Sentinel
 

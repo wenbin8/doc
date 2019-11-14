@@ -272,6 +272,8 @@ public class App {
 
 创建如下图结构的项目工程
 
+
+
 ![image-20191113081824682](assets/image-20191113081824682.png)
 
 ##### dubbo-demo-server
@@ -926,3 +928,4 @@ Dubbo里面提供了一种基于终端操作的方法来实现服务治理使用
 - count XxxService 10: 统计 10 次服务任意方法的调用情况
 
 - count XxxService xxxMethod: 统计 1 次服务方法的调用情况 count XxxService xxxMethod 10: 统计 10 次服务方法的调用情况 
+
