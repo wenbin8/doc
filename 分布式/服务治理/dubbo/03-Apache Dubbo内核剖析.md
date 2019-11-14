@@ -39,6 +39,8 @@ JDK本身提供了数据访问的api。在java.sql这个包里面。
 
 因为我们在实际应用中用的比较多的是mysql，所以到mysql包里面可以看到一个如下图的目录结构：
 
+
+
 ![image-20191114135958673](assets/image-20191114135958673.png)
 
 这个文件里面写的就是mysql的驱动实现。通过SPI机制把Java.sql.Driver和mysql的驱动做了集成。这样就达到了各个数据库厂商自己去实现数据库连接，jdk本身不关心你怎么实现。
@@ -513,6 +515,38 @@ private ExtensionLoader(Class<?> type) {
 
 注意:@Adaptive加载到类上表示这是一个自定义的适配器类，表示我们再调用getAdaptiveExtension方法的时候，不需要走上面这么复杂的过程。会直接加载到AdaptiveExtensionFactory。然后在getAdaptiveExtensionClass()方法处有判断。
 
+```java
+private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name) throws NoSuchMethodException {
+    if (!type.isAssignableFrom(clazz)) {
+        throw new IllegalStateException("Error occurred when loading extension class (interface: " +
+                type + ", class line: " + clazz.getName() + "), class "
+                + clazz.getName() + " is not subtype of interface.");
+    }
+    if (clazz.isAnnotationPresent(Adaptive.class)) {
+        cacheAdaptiveClass(clazz);
+    } else if (isWrapperClass(clazz)) {
+        cacheWrapperClass(clazz);
+    } else {
+        clazz.getConstructor();
+        if (StringUtils.isEmpty(name)) {
+            name = findAnnotationName(clazz);
+            if (name.length() == 0) {
+                throw new IllegalStateException("No such extension name for the class " + clazz.getName() + " in the config " + resourceURL);
+            }
+        }
+
+        String[] names = NAME_SEPARATOR.split(name);
+        if (ArrayUtils.isNotEmpty(names)) {
+            cacheActivateClass(clazz, names[0]);
+            for (String n : names) {
+                cacheName(clazz, n);
+                saveInExtensionClass(extensionClasses, clazz, name);
+            }
+        }
+    }
+}
+```
+
 ![image-20191114161714075](assets/image-20191114161714075.png)
 
 我们可以看到除了自定义的自适应适配器类以外，还有两个实现类，一个是 SPI，一个是Spring，AdaptiveExtensionFactory轮询这2个，从一个中获取到就返回。 
@@ -540,7 +574,7 @@ public <T> T getExtension(Class<T> type, String name) {
 
 如下:
 
-group表示客户端和和服务端都会加载，value表示url中有cache_key的时候  
+group表示客户端和和服务端都会加载，value表示url中有cache_key的时候就加载这个Filter。
 
 ```java
 @Activate(group = {CONSUMER, PROVIDER}, value = CACHE_KEY) public class CacheFilter implements Filter {
