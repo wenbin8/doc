@@ -120,7 +120,7 @@ Dubbo：
 - [x] [服务治理之Apache Dubbo的基本认识](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/01-服务治理之Apache%20Dubbo的基本认识.md)
 - [x] [Apache Dubbo的服务治理功能](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/02-Apache%20Dubbo的服务治理功能.md)
 - [x] [Apache Dubbo内核剖析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/03-Apache%20Dubbo内核剖析.md)
-- [ ] Apache Dubbo服务发布源码分析
+- [x] [Apache Dubbo服务发布源码分析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/04-Apache%20Dubbo服务发布源码分析.md)
 - [ ] Apache Dubbo服务注册源码分析
 - [ ] Apache Dubbo容错以及集群源码分析
 - [ ] nacos
