@@ -619,7 +619,7 @@ public class Protocol$Adaptive implements org.apache.dubbo.rpc.Protocol {
 
 这里面会有很多逻辑：
 
-- 实现吧对应协议的服务发布
+- 实现把对应协议的服务发布
 - 实现服务注册
 - 订阅服务重写
 
@@ -681,7 +681,7 @@ public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcExceptio
 
 key：从originInvoker中获得发布协议的url:dubbo://ip:port/....
 
-bounds:一个prviderUrl服务export之后，缓存bounds中，所以一个providerUrl只会对应一个exporter。
+bounds:一个providerUrl服务export之后，缓存bounds中，所以一个providerUrl只会对应一个exporter。
 
 ```java
 private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker, URL providerUrl) {
@@ -699,7 +699,7 @@ private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originIn
 }
 ```
 
-**InvokerDelegete**: 是RegistryProtocol的一个静态内部类，该类是一个originInvoker的委托类，该类存储了 originInvoker，其父类InvokerWrapper还会存储providerUrl，InvokerWrapper会调用originInvoker的invoke 方法，也会销毁invoker。可以管理invoker的生命周期。
+**InvokerDelegete**: 是RegistryProtocol的一个静态内部类，该类是一个originInvoker的委托类，该类存储了 originInvoker，其父类InvokerWrapper还会存储providerUrl，InvokerWrapper会调用originInvoker的invoke方法，也会销毁invoker。可以管理invoker的生命周期。
 
 #### **DubboProtocol.export** 
 
