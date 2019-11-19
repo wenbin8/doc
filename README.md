@@ -122,7 +122,7 @@ Dubbo：
 - [x] [Apache Dubbo内核剖析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/03-Apache%20Dubbo内核剖析.md)
 - [x] [Apache Dubbo服务发布源码分析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/04-Apache%20Dubbo服务发布源码分析.md)
 - [x] [Apache Dubbo服务注册及服务消费源码分析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/05-Apache%20Dubbo服务注册及服务消费源码分析.md)
-- [x] Apache Dubbo容错以及集群源码分析
+- [x] [Apache Dubbo服务通信及负载均衡](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/06-Apache%20Dubbo服务通信及负载均衡.md)
 - [ ] nacos
 - [ ] Sentinel
 
