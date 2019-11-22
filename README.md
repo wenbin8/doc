@@ -73,8 +73,6 @@ Spring:
 - [x] [HTTP及HTTPS协议原理](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/03-HTTP及HTTPS协议原理.md)
 - [x] [序列化与反序列化](https://github.com/wenbin8/doc/blob/master/分布式/分布式基础/04-序列化和反序列化.md)
 
-
-
 #### 微服务(Spring boot/Spring Cloud)
 
 - [x] [微服务的发展](https://github.com/wenbin8/doc/blob/master/微服务/微服务的发展.md)
@@ -92,6 +90,7 @@ Spring:
 #### 分布式协调服务
 
 - [x] [分布式系统与一致性协议](https://github.com/wenbin8/doc/blob/master/分布式/分布式协调服务/分布式系统与一致性协议.md)
+- [x] [raft协议](http://thesecretlivesofdata.com/raft/)
 
 zookeeper:
 
@@ -123,12 +122,18 @@ Dubbo：
 - [x] [Apache Dubbo服务发布源码分析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/04-Apache%20Dubbo服务发布源码分析.md)
 - [x] [Apache Dubbo服务注册及服务消费源码分析](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/05-Apache%20Dubbo服务注册及服务消费源码分析.md)
 - [x] [Apache Dubbo服务通信及负载均衡](https://github.com/wenbin8/doc/blob/master/分布式/服务治理/dubbo/06-Apache%20Dubbo服务通信及负载均衡.md)
-- [ ] nacos
-- [ ] Sentinel
+
+nacos
+
+- [x] [nacos](https://nacos.io/zh-cn/docs/what-is-nacos.html)
+
+Sentinel
+
+- [x] [Sentinel](https://github.com/all4you/sentinel-tutorial)
 
 ###### netfilx:
 
-- [ ] Eureka注册中心
+- [ ] Eureka注册中心3.20
 - [ ] Ribbon 负载均衡
 - [ ] Fegin 声明式服务调用
 - [ ] Hystrix 服务熔断降级方式
@@ -148,7 +153,7 @@ Dubbo：
 - [ ] MongoDB
 - [ ] Redis
 
-#### 云原生
+#### Cloud Native
 
 ##### Docker
 
@@ -161,4 +166,4 @@ Dubbo：
 - [ ] docker Compose 
 
 ##### K8S
-
+- [ ] docker Compose 
