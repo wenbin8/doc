@@ -145,7 +145,11 @@ Sentinel
 
 #### 分布式消息通信
 
-- [ ] kafka
+- [x] 消息中间件的背景分析
+
+kafka
+
+- [x] kafka基础及安装部署
 - [ ] rabbitMQ
 
 #### 分布式缓存
