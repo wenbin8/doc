@@ -145,11 +145,11 @@ Sentinel
 
 #### 分布式消息通信
 
-- [x] 消息中间件的背景分析
+- [x] [消息中间件的背景分析](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/消息中间件的背景分析.md)
 
 kafka
 
-- [x] kafka基础及安装部署
+- [x] [kafka基础及安装部署](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/01-kafka基础及安装部署.md)
 - [ ] rabbitMQ
 
 #### 分布式缓存
