@@ -150,6 +150,7 @@ Sentinel
 kafka
 
 - [x] [kafka基础及安装部署](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/01-kafka基础及安装部署.md)
+- [x] kafka应用及原理
 - [ ] rabbitMQ
 
 #### 分布式缓存
