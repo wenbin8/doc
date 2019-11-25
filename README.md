@@ -156,7 +156,7 @@ kafka
 - [x] [kafka分区副本及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
 
 rabbitMQ
-- [x] rabbitMQ简介及基本使用
+- [x] [rabbitMQ简介及基本使用](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/01-rabbitMQ简介即基本使用.md)
 - [ ] rabbitMQ进阶知识及Spring AMQP
 - [ ] rabbitMQ可靠性投递与高可用
 
