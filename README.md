@@ -150,9 +150,20 @@ Sentinel
 kafka
 
 - [x] [kafka基础及安装部署](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/01-kafka基础及安装部署.md)
+
 - [x] [kafka应用及原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/02-kafka应用及原理.md)
-- [x] kafka分区副本及消息存储原理
-- [ ] rabbitMQ
+
+- [x] [kafka分区副本及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
+
+rabbitMQ
+- [x] rabbitMQ简介及基本使用
+- [ ] rabbitMQ进阶知识及Spring AMQP
+- [ ] rabbitMQ可靠性投递与高可用
+
+RocketMQ
+
+- [ ] 
+
 
 #### 分布式缓存
 
