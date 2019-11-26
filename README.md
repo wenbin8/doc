@@ -158,7 +158,7 @@ kafka
 rabbitMQ
 - [x] [rabbitMQ简介及基本使用](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/01-rabbitMQ简介即基本使用.md)
 - [x] [rabbitMQ进阶知识及SpringAMQP](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/02-rabbitMQ进阶知识及Spring%20AMQP.md)
-- [ ] rabbitMQ可靠性投递与高可用
+- [x] [rabbitMQ可靠性投递与高可用](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/03-rabbitMQ可靠性投递与高可用.md)
 
 RocketMQ
 
