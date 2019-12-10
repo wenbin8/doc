@@ -104,7 +104,6 @@ zookeeper:
 
 etcd:
 - [ ] etcd安装部署
-- [ ] raft协议
 - [ ] V2 API
 - [ ] V3 API
 
@@ -133,7 +132,7 @@ Sentinel
 
 ###### netfilx:
 
-- [ ] Eureka注册中心3.20
+- [ ] Eureka注册中心
 - [ ] Ribbon 负载均衡
 - [ ] Fegin 声明式服务调用
 - [ ] Hystrix 服务熔断降级方式
@@ -184,3 +183,5 @@ RocketMQ
 
 ##### K8S
 - [ ] docker Compose 
+
+kubeadm token create —pring-join-command
