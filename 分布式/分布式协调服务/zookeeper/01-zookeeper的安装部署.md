@@ -50,7 +50,7 @@ zookeeper有两种运行模式：集群模式和单机模式。
 
 docker机器上新建文件：stack.yml，将项目内容复制到yml文件中。
 
-```
+```yaml
 services:
   zoo1:
     image: zookeeper
@@ -110,4 +110,74 @@ bin/zkServer.sh restart
 连接服务器 
 
 zkCli.sh -timeout 0 -r -server ip:port 
+
+## 单机安装
+
+创建目录
+
+```shell
+mkdir -p /usr/local/soft/zookeeper
+cd /usr/local/soft/zookeeper
+```
+
+下载解压
+
+```shell
+wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz
+tar -zxvf zookeeper-3.4.9.tar.gz
+cd zookeeper-3.4.9
+mkdir data
+mkdir logs
+```
+
+修改配置文件
+
+```shell
+cd conf
+cp zoo_sample.cfg zoo.cfg
+```
+
+修改zoo.cfg
+
+```properties
+# 数据文件夹
+dataDir=/usr/local/services/zookeeper/zookeeper-3.4.9/data
+
+# 日志文件夹
+dataLogDir=/usr/local/services/zookeeper/zookeeper-3.4.9/logs
+```
+
+配置环境变量
+
+```shell
+vim /etc/profile
+```
+
+在尾部追加
+
+```shell
+# zk env
+export ZOOKEEPER_HOME=/usr/local/soft/zookeeper/zookeeper-3.4.9/
+export PATH=$ZOOKEEPER_HOME/bin:$PATH
+export PATH
+```
+
+编译生效
+
+```shell
+source /etc/profile
+```
+
+启动ZK
+
+```powershell
+cd ../bin
+zkServer.sh start
+```
+
+查看状态
+
+```shell
+zkServer.sh status
+```
 

@@ -60,10 +60,6 @@ Spring:
 - [ ] b+Tree的原理与Mysql的innoDB索引原理
 - [ ] mySql数据查询性能优化
 
-### 数据库分库分表
-
-- [ ] Mycat
-
 ### 分布式
 
 #### 分布式基础
@@ -175,6 +171,15 @@ Redis
 - [x] [Redis进阶](https://github.com/wenbin8/doc/blob/master/分布式/缓存/03-Redis进阶.md)
 - [x] [Redis集群](https://github.com/wenbin8/doc/blob/master/分布式/缓存/04-Redis集群.md)
 - [x] [Redis实战](https://github.com/wenbin8/doc/blob/master/分布式/缓存/05-Redis实战.md)
+
+### 分库分表
+
+- [x] 分库分表-总体概述
+
+Mycat
+
+- [x] Mycat基础
+- [x] Mycat进阶
 
 #### Cloud Native
 
