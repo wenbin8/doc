@@ -185,7 +185,7 @@ Mycat
 
 - [x] [Quarzt](https://github.com/wenbin8/doc/blob/master/分布式/任务调度/01-Quarzt.md)
 
-- [ ] Elastic-job
+- [x] [Elastic-job](https://github.com/wenbin8/doc/blob/master/分布式/任务调度/02-Elastic-job.md)
 
 #### Cloud Native
 
