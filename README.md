@@ -191,15 +191,21 @@ Mycat
 
 ##### Docker
 
-- [ ] 理解docker实现原理(内核支持,和联合文件系统)
-- [ ] docker镜像和镜像仓库
-- [ ] docker容器启动与资源分配
-- [ ] docker数据卷(volumes)
-- [ ] docker的网络
-- [ ] dockerfile的使用
-- [ ] docker Compose 
+- [x] Vagrant创建虚拟机，安装Docker
 
-##### K8S
+- [x] [Docker基础](https://www.runoob.com/docker/docker-tutorial.html)
+
+- [x] [Docker命令大全](https://www.runoob.com/docker/docker-command-manual.html)
+
+- [x] [理解docker实现原理(Namespaces，CGroups和联合文件系统)](http://dockone.io/article/2941)
+
+  
+
+##### Kubernetes
 - [ ] docker Compose 
 
 kubeadm token create —pring-join-command
+
+##### Service Mesh
+
+- [ ] docker Compose 
