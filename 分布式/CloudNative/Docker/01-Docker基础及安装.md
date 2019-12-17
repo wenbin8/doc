@@ -1,3 +1,27 @@
+# Docker基础及安装
+
+## Docker的基本概念
+
+镜像（Image）、容器（Container）、仓库（Repository）、网络（network）、数据卷（data volumes），是Docker中最基本也是最核心的概念，对这些概念的掌握与理解，是学习Docker的关键。
+
+
+
+### Docker的架构
+
+Docker跟大部分服务端软件一样（如MySQL），都是使用C/S的架构模型，也就是通过客户端调用服务器，只是我们现在刚好服务端和客户端都在同一台机器上而已。
+
+![image-20191217161417888](assets/image-20191217161417888.png)
+
+### Docker Engine
+
+Docker Server为客户端提供了容器、镜像、数据卷、网络管理等功能，其实，这些功能都是由Docker Engine来实现的。
+
+1. dockerd：服务器守护进程。
+2. Client docker Cli：命令行接口
+3. REST API：除了cli命令行接口，也可以通过REST API调用Docker
+
+<img src="assets/image-20191217161159382.png" alt="image-20191217161159382" style="zoom:50%;" />
+
 # Vagrant创建虚拟机，安装Docker
 
 ## 1.5.1 在Win10上准备centos7
