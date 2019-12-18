@@ -196,6 +196,7 @@ Mycat
 - [x] [Docker基础及安装](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Docker/01-Docker基础及安装.md)
 - [x] [镜像和容器](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Docker/02-镜像和容器.md)
 - [x] [Docker网络](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Docker/03-Docker网络.md)
+- [ ] Docker数据持久化与练习
 
 ##### Kubernetes
 - [ ] docker Compose 
