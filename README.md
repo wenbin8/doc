@@ -203,8 +203,9 @@ Mycat
 
 - [x] [Kubernetes集群搭建](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/01-Kubernetes集群搭建.md)
 - [x] [Kubernetes入门](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/02-Kubernetes入门.md)
-- [x] [Kubernetes常用资源使用及Ingress网络](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/03-Kubernetes常用资源使用及Ingress网络.md)
+- [x] [Kubernetes常用资源使用及网络](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/03-Kubernetes常用资源使用及网络.md)
 - [x] [Kubernetes实战](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/04-Kubernetes实战.md)
+- [ ] Kubernetes存储（Volumes\PV\PVC）
 
 ##### Service Mesh
 
