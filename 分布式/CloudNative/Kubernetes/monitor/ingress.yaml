@@ -1,0 +1,15 @@
+#ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: ns-monitor
+spec:
+  rules:
+  - host: monitor.k8s.itcrazy2016.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: grafana-service
+          servicePort: 3000

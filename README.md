@@ -208,9 +208,9 @@ Mycat
 - [x] [Kubernetes存储（Volumes\PV\PVC）](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/05-Kubernetes存储（Volumes%20PV%20PVC).md)
 - [x] [Kubernetes深入掌握Pod](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/06-Kubernetes深入掌握Pod.md)
 - [x] [Kubernetes核心组件](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/07-Kubernetes核心组件.md)
-- [x] Kubernetes部署策略
-- [ ] Kubernetes日志与监控
-- [ ] Kubernetes Trouble Shooting
+- [x] [Kubernetes部署策略](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/08-Kubernetes部署策略.md)
+- [x] Kubernetes日志与监控
+- [x] Kubernetes Trouble Shooting
 
 ##### Service Mesh
 
