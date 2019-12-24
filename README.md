@@ -205,8 +205,8 @@ Mycat
 - [x] [Kubernetes入门](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/02-Kubernetes入门.md)
 - [x] [Kubernetes常用资源使用及网络](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/03-Kubernetes常用资源使用及网络.md)
 - [x] [Kubernetes实战](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/04-Kubernetes实战.md)
-- [x] Kubernetes存储（Volumes\PV\PVC）
-- [x] Kubernetes深入掌握Pod
+- [x] [Kubernetes存储（Volumes\PV\PVC）](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/05-Kubernetes存储（Volumes%20PV%20PVC).md)
+- [x] [Kubernetes深入掌握Pod](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/06-Kubernetes深入掌握Pod.md)
 - [ ] Kubernetes核心组件
 - [ ] Kubernetes部署策略
 - [ ] Kubernetes日志监控
