@@ -157,7 +157,7 @@ rabbitMQ
 
 RocketMQ
 
-- [ ] 
+- [ ] 占位
 
 
 #### 分布式缓存
@@ -205,8 +205,8 @@ Mycat
 - [x] [Kubernetes入门](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/02-Kubernetes入门.md)
 - [x] [Kubernetes常用资源使用及网络](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/03-Kubernetes常用资源使用及网络.md)
 - [x] [Kubernetes实战](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/04-Kubernetes实战.md)
-- [ ] Kubernetes存储（Volumes\PV\PVC）
-- [ ] Kubernetes深入掌握Pod
+- [x] Kubernetes存储（Volumes\PV\PVC）
+- [x] Kubernetes深入掌握Pod
 - [ ] Kubernetes核心组件
 - [ ] Kubernetes部署策略
 - [ ] Kubernetes日志监控
