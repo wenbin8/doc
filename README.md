@@ -125,6 +125,7 @@ nacos
 Sentinel
 
 - [x] [Sentinel](https://github.com/all4you/sentinel-tutorial)
+- [x] [SentinelDoc](https://github.com/alibaba/Sentinel/wiki/介绍)
 
 ###### netfilx:
 
@@ -214,5 +215,9 @@ Mycat
 
 ##### Service Mesh
 
-- [ ] 占位
+- [ ] istio基础及安装部署
+- [ ] istio Sidecar机制
+- [ ] istio流量治理
+- [ ] istio策略和遥测
+- [ ] istio服务安全
 
