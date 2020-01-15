@@ -317,7 +317,7 @@ public static void main(String[] args) throws InterruptedException {
 
 #### Topic
 
-在kafka中，topic是一个存储消息的逻辑概念，可以认为是一个消息集合。每条消息发送到kafka集群的消息都有一个类别。物理上来说，不同的topic的消息是分开存储的。
+在kafka中，**topic是一个存储消息的逻辑概念，可以认为是一个消息集合。每条消息发送到kafka集群的消息都有一个类别。物理上来说，不同的topic的消息是分开存储的。**
 
 每个topic可以有多个生产者向它发送消息，也可以有多个消费者去消费其中的消息。
 
@@ -576,7 +576,7 @@ kafka在0.11.x版本支持了StrickyAssignor, 翻译过来叫粘滞策略，它�
 
 #### **coordinator** 
 
-Kafka提供了一个角色：coordinator来执行对于consumer group的管理，Kafka提供了一个角色：coordinator来执行对于consumer group的管理，当consumer group的第一个consumer启动的时候，它会去和kafka确定岁是它们组的coordinator。之后该group内的所有成员都会和该coordinator进行协调通信。
+Kafka提供了一个角色：coordinator来执行对于consumer group的管理，当consumer group的第一个consumer启动的时候，它会去和kafka确定岁是它们组的coordinator。之后该group内的所有成员都会和该coordinator进行协调通信。
 
 ##### 如何确定coordinator
 
@@ -625,7 +625,7 @@ Consumer group得分区分配方案是在客户端执行的！Kafka将这个权�
 
 - 对于每个consumer group子集，都会在服务端对应一个GroupCoordinator进行管理，GroupCoordinator会在zookeeper上添加watcher，当消费者加入或者退出consumer group时，会修改zookeeper上保存的数据，从而触发GroupCoordinator开始Rebalance操作。
 - 当消费者准备加入某个Consumer group或者GroupCoordinator发生故障转移时，消费者并不知道GroupCoordinator在网络中的位置，这个时候就需要确定GroupCoordinator，消费者会向集群中的任意一个broker节点发送ConsumerMetadataRequest请求，收到请求的broker会返回一个response作为响应，其中包含管理当前ConsumerGroup的GroupCoordinator。
-- 消费者会根据broker的返回信息，连接到GrouCoordinator，并且发送HeartbeatRequest，发送心跳的目的是要告诉GroupCoordinator这个消费者是正常在线的。当消费者在指定时间内没有发送心跳请求，则GroupCoordinator会触发Rebalance操作。
+- 消费者会根据broker的返回信息，连接到GroupCoordinator，并且发送HeartbeatRequest，发送心跳的目的是要告诉GroupCoordinator这个消费者是正常在线的。当消费者在指定时间内没有发送心跳请求，则GroupCoordinator会触发Rebalance操作。
 - 发起join group请求，两种情况：
   - 如果GroupCoordinator返回的心跳包数据包含异常，说明GroupCoordinator因为前面说的几种情况导致Rebalance操作，那这个时候，consumer会发起join group请求。
   - 新加入到consumer group的consumer确定好了GroupCoordinator以后消费者回想GroupCoordinator发起join group请求，GroupCoordinator收集全部消费者信息之后，来确认可用的消费者，并从中选取一个消费者成为group leader。并把相应的信息（分区分配策略、Leader_id、.....）封装成一个response返回给所有消费者，但是只有group leader会受到当前Consumer group中的所有消费者信息。当消费者确定自己是group leader后，会根据消费者的信息以及选定分区分配策略进行分区分配。
@@ -636,7 +636,7 @@ Consumer group得分区分配方案是在客户端执行的！Kafka将这个权�
 
 #### offset
 
-前面在介绍partition的时候，提到过offset，每个topic可以划分多个分区（每个Topic至少有一个分区），同一topic下不同分区包含的消息是不同的。每个消息在被添加到分区时，都会被分配一个offset（称之为偏移量），它是消息在此分区中的唯一编号，kafka通过offset保证消息在分区内的熟悉怒，offset的顺序不跨分区，即kafka值保证在同一个分区内的消息是有序的。对于应用层的消费来说，每次消费一个消息并且提交以后，会保存当前消费到的最近的一个offset。那么offset保存在哪里？
+前面在介绍partition的时候，提到过offset，每个topic可以划分多个分区（每个Topic至少有一个分区），同一topic下不同分区包含的消息是不同的。每个消息在被添加到分区时，都会被分配一个offset（称之为偏移量），它是消息在此分区中的唯一编号，kafka通过offset保证消息在分区内的顺序，offset的顺序不跨分区，即kafka只保证在同一个分区内的消息是有序的。对于应用层的消费来说，每次消费一个消息并且提交以后，会保存当前消费到的最近的一个offset。那么offset保存在哪里？
 
 ![image-20191124183548042](assets/image-20191124183548042.png)
 

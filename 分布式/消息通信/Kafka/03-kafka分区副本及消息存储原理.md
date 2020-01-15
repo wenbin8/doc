@@ -1,4 +1,4 @@
-# kafka分区副本及消息存储原理
+# kafka分区副本及消息存储原理
 
 ## 分区副本机制
 
@@ -48,8 +48,8 @@ kafka分区下有可能有很多副本（replica）用于实现冗余，从而�
 
 - Leader副本：响应clients端读写请求的副本。
 - follower副本：被动的备份leader副本中的数据，不能响应clients端的读写请求。
-- ISR副本：包含了leader副本和所有与leader副本保持同步的follower副本——如果判定是否与leader同步后面会提到，每个kafka父辈对象都有两个重要的属性：LEO和HW。注意是所有的副本，而不只是leader副本。
-- LEO：即日志末端位移（log end offset），记录了该副本底层日志（log）中吓一跳消息的位移值。注意是吓一跳消息！也就是说，如果LEO=10,那么表示该副本保存了10条消息，位移值范围是[0,9]。另外，leader LEO和follower LEO的更新是有区别的。后面详细说。
+- ISR副本：包含了leader副本和所有与leader副本保持同步的follower副本——如何判定是否与leader同步后面会提到，每个kafka父辈对象都有两个重要的属性：LEO和HW。注意是所有的副本，而不只是leader副本。
+- LEO：即日志末端位移（log end offset），记录了该副本底层日志（log）中下一条消息的位移值。注意是下一条消息！也就是说，如果LEO=10,那么表示该副本保存了10条消息，位移值范围是[0,9]。另外，leader LEO和follower LEO的更新是有区别的。后面详细说。
 - HW：即上面提到的水位值。对于同一副本对象而言，其HW值不会大于LEO值。小于等于HW值的所有消息都被认为是”已备份“的（repllicated）。同理，leader副本和follower副本的HW更新是有却别的。
 
 > 从生产者发出的一条消息首先会被写入分区的leader 副本，不过还需要等待ISR集合中的所有follower副本都同步完之后才能被认为已经提交，之后才会更新分区的HW, 进而消费者可以消费到这条消息。 
@@ -243,7 +243,7 @@ kafka是通过分段的方式将Log分为多个LogSegment，LogSegment是一个�
 
 ### **LogSegment** 
 
-假设kafka以partition为最小存储单位，那么我们可以想象当kafka producer不断发送消息，必然会引起partition文件的无线扩张，这样对于消息文件的维护以及被消费的消息的清理带来非常大的挑战，所以kafka 以segment为单位又把partition进行细分。每个partition相当于一个巨型文件被平均分配到多个大小相等的segment数据文件中(每个segment文件中的消息不一定相等)，这种特性方便已经被消费的消息的清理，提高磁盘的利用率。 
+假设kafka以partition为最小存储单位，那么我们可以想象当kafka producer不断发送消息，必然会引起partition文件的无限扩张，这样对于消息文件的维护以及被消费的消息的清理带来非常大的挑战，所以kafka 以segment为单位又把partition进行细分。每个partition相当于一个巨型文件被平均分配到多个大小相等的segment数据文件中(每个segment文件中的消息不一定相等)，这种特性方便已经被消费的消息的清理，提高磁盘的利用率。 
 
 - log.segment.bytes=107370 (设置分段大小),默认是1gb，我们把这个值调小以后，可以看到日志 分段的效果
 - 抽取其中3个分段来进行分析 

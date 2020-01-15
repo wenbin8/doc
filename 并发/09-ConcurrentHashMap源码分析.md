@@ -359,7 +359,7 @@ private final void addCount(long x, int check) {
     if (check >= 0) {
         Node<K,V>[] tab, nt; int n, sc;
         // s标识集合大小，如果集合大小大于或等于扩容阈值（默认值的0.75）
-        // 并且table不为空并且table的长度下雨最大容量
+        // 并且table不为空并且table的长度小于最大容量
         while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
                (n = tab.length) < MAXIMUM_CAPACITY) {
             int rs = resizeStamp(n); // 生成一个唯一的扩容戳。这里有些复杂，后续会分析
@@ -370,7 +370,7 @@ private final void addCount(long x, int check) {
                 // sc=rs+1表示扩容结束
                 // sc==rs+MAX_RESIZERS表示帮助线程已经达到最大值了
                 // nt=nextTable -> 表示扩容已经结束
-                // transferIndex<=0表示所有的tranfer任务都被领完了，没有生育的hash桶来给当前线程做
+                // transferIndex<=0表示所有的tranfer任务都被领完了，没有剩余的hash桶来给当前线程做
                 if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
                     sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||
                     transferIndex <= 0)
@@ -513,7 +513,7 @@ private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
                 // 如果sc-2不等于表示符左移16位。如果他们相等了，说明没有线程在帮助他们扩容了。也就是说扩容结束了。
                 if ((sc - 2) != resizeStamp(n) << RESIZE_STAMP_SHIFT)
                     return;
-                // 如果氙灯，扩容结束了，更新finising变量
+                // 如果相等，扩容结束了，更新finising变量
                 finishing = advance = true;
                 // 再次循环检查一下整张表
                 i = n; // recheck before commit

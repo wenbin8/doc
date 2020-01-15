@@ -176,7 +176,7 @@ public class ReadWriteLockDemo {
 
 ### AQS的内部实现
 
-AQS队列内部维护的是一个FIFO的双向链表，这种结构的特点是每个数据结构都有两个指针，分别指向直接后继节点和直接前驱节点。所以双向链表可以在从任意一个节点开始很方便的访问前驱和后继节点。每个Node其实是由线程封装，当线程争抢锁失败后会封装成Node加入到AQS队列中去。当获取锁的线程释放锁以后，会从队列中唤醒一个阻塞的节点（线程）。
+**AQS队列内部维护的是一个FIFO的双向链表，这种结构的特点是每个数据结构都有两个指针，分别指向直接后继节点和直接前驱节点。**所以双向链表可以在从任意一个节点开始很方便的访问前驱和后继节点。每个Node其实是由线程封装，当线程争抢锁失败后会封装成Node加入到AQS队列中去。当获取锁的线程释放锁以后，会从队列中唤醒一个阻塞的节点（线程）。
 
 <img src="assets/image-20191014152208383.png" alt="image-20191014152208383" style="zoom:50%;" />
 
@@ -305,7 +305,7 @@ protected final boolean compareAndSetState(int expect, int update) {
 
 通过CAS乐观锁的方式来做比较并替换，这段代码的意思是，如果当前内存中的state的值和预期值expet相等，则替换为update。更新成功返回true，否则返回fasle。
 
-这个操作是源自的，不会出现线程安全问题，这里面涉及到Unsafe这个类的操作，以及设计到state这个属性的意义。
+这个操作是原子的，不会出现线程安全问题，这里面涉及到Unsafe这个类的操作，以及涉及到state这个属性的意义。
 
 state是AQS中的一个属性，它在不同的实现中锁表达含义不一样，对于重入锁的实现来说，表示一个同步状态。它有两个含义表示：
 
@@ -417,7 +417,7 @@ private Node addWaiter(Node mode) {
     // 把当前线程封装为Node
     Node node = new Node(Thread.currentThread(), mode);
     // Try the fast path of enq; backup to full enq on failure
-    // tail是AQS中表示队列对位的属性，默认是null
+    // tail是AQS中表示队列队尾的属性，默认是null
     Node pred = tail;
     // tail不为空的情况下，说明队里中存在节点
     if (pred != null) {
@@ -760,7 +760,7 @@ final boolean acquireQueued(final Node node, int arg) {
 
 ### 公平锁和非公平锁的区别
 
-锁的公平性是相对于获取锁的顺序而言的，如果是一个公平锁，那么锁的获取顺序就应该符合请求的绝对时间顺序，也就是FIFO。在上面分析的例子来说，只要CAS设置同步状态成功，则表示当前线程获取了锁，而公平锁则不一样，差异点有两个
+**锁的公平性是相对于获取锁的顺序而言的，如果是一个公平锁，那么锁的获取顺序就应该符合请求的绝对时间顺序，也就是FIFO。**在上面分析的例子来说，只要CAS设置同步状态成功，则表示当前线程获取了锁，而公平锁则不一样，差异点有两个
 
 #### FairSync.lock
 

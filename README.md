@@ -100,8 +100,6 @@ zookeeper:
 
 etcd:
 - [ ] etcd安装部署
-- [ ] V2 API
-- [ ] V3 API
 
 #### 分布式服务治理
 
@@ -149,7 +147,7 @@ kafka
 
 - [x] [kafka应用及原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/02-kafka应用及原理.md)
 
-- [x] [kafka分区副本及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
+- [x] [kafka分区副本w及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
 
 rabbitMQ
 - [x] [rabbitMQ简介及基本使用](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/01-rabbitMQ简介即基本使用.md)
@@ -189,6 +187,12 @@ Mycat
 - [x] [Elastic-job](https://github.com/wenbin8/doc/blob/master/分布式/任务调度/02-Elastic-job.md)
 
 #### Cloud Native
+
+##### 网络基础
+
+- [ ] Network Namespase、veth pair、bridge、Iptables
+- [ ] tun/tap设备、隧道ipip、VXLAN
+- [ ] 
 
 ##### Docker
 
