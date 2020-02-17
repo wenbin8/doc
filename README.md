@@ -22,9 +22,9 @@
 
 ### JVM
 
+- [ ] 类加载机制与编译优化
 - [ ] JVM运行时数据区的内存管理机制
 - [ ] 垃圾收集算法与垃圾收集器
-- [ ] 类加载机制与编译优化
 - [ ] 性能监控与故障处理
 
 ### 常用设计模式
@@ -48,6 +48,8 @@
 ### 框架源码分析
 
 Spring:
+
+通过对Spring的核心流程总结。简化实现Spring，来加深对Spring源码的理解。如果直接看源码懵逼的话。可以先通过这个项目（https://github.com/wenbin8/myCode）来看看Spring的总体流程，该项目剥离的Spring核心（IOC\DI\AOP\MVC）之外的逻辑，帮助快速掌握理解Spring核心的设计思想与实现原理。理解了这个项目在去深入研究Spring源码就有了一定的基础。这里的代码来源都是参考《Spring 5核心原理与30个类手写实战》有兴趣深入研究的也可以参考这本书。
 
 - [x] [Spring5的系统架构和源码构建](https://github.com/wenbin8/doc/blob/master/Spring/01-Spring核心概念与系统架构.md)
 - [x] [Spring的IOC源码分析](https://github.com/wenbin8/doc/blob/master/Spring/02-Spring-IOC源码分析.md)
