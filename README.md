@@ -75,15 +75,13 @@ Spring:
 
 - [x] [微服务的发展](https://github.com/wenbin8/doc/blob/master/微服务/微服务的发展.md)
 
-##### Spring Boot
+##### Spring Boot 
 
 - [x] [Spring Boot的基本认识](https://github.com/wenbin8/doc/blob/master/微服务/SpringBoot/01-Spring%20Boot的基本认识.md)
 - [ ] Spring Boot嵌入式Web容器
 - [ ] Spring Boot Actuator
-- [ ] Spring Boot自动装配
+- [ ] Spring Boot自动装配：重新整合Spring注解编程模型，@Enable模块驱动及条件装配等Spring Framework原生特性。
 - [ ] Spring Boot理解SpringApplication
-
-
 
 #### 分布式协调服务
 
@@ -149,7 +147,7 @@ kafka
 
 - [x] [kafka应用及原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/02-kafka应用及原理.md)
 
-- [x] [kafka分区副本w及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
+- [x] [kafka分区副本及消息存储原理](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/Kafka/03-kafka分区副本及消息存储原理.md)
 
 rabbitMQ
 - [x] [rabbitMQ简介及基本使用](https://github.com/wenbin8/doc/blob/master/分布式/消息通信/RabbitMQ/01-rabbitMQ简介即基本使用.md)
@@ -192,8 +190,8 @@ Mycat
 
 ##### 网络基础
 
-- [ ] Network Namespase、veth pair、bridge、Iptables
-- [ ] tun/tap设备、隧道ipip、VXLAN
+- [ ] 
+- [x] 02-Linux 网络基础（Network Namespase、veth pair、bridge、Iptables）
 - [ ] 
 
 ##### Docker
