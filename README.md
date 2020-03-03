@@ -190,7 +190,7 @@ Mycat
 
 ##### 网络基础
 
-经过一个阶段的k8s学习后发现其实现大量使用linux的网络，所以回头重新整理一下k8s在具体实现中使用到的Linux网络的基础知识。对深入理解k8s实现原理和实际应用中故障处理大有裨益。
+经过一个阶段的k8s学习后发现其实现大量使用linux中的网络知识，要想深入研究k8s这些基础知识必不可少。所以回头重新整理一下k8s在具体实现中使用到的Linux网络的基础知识。对深入理解k8s实现原理和实际应用中故障处理大有裨益。同时推荐《杜军. Kubernetes网络权威指南：基础、原理与实践》这本书来帮助我们理解k8s的网络。
 
 - [ ] [Linux 中常用网络命令](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/网络基础/01-Linux中常用网络命令.md)
 - [x] [Linux 网络基础（Network Namespase、veth pair、bridge、Iptables）](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/网络基础/02-Linux%20网络基础（Network%20Namespase、veth%20pair、bridge、Iptables）.md)
