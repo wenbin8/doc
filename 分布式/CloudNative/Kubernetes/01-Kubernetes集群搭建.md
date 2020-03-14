@@ -415,7 +415,7 @@ done
 
 ```
 # 本地有镜像
-kubeadm init --kubernetes-version=1.14.0 --apiserver-advertise-address=192.168.81.51 --pod-network-cidr=10.244.0.0/16
+kubeadm init --kubernetes-version=1.14.0 --apiserver-advertise-address=192.168.1.51 --pod-network-cidr=10.244.0.0/16
 【若要重新初始化集群状态：kubeadm reset，然后再进行上述操作】
 ```
 
@@ -468,8 +468,8 @@ kubectl get pods --all-namespaces -w
 > **记得保存初始化master节点的最后打印信息【注意这边大家要自己的，下面我的只是一个参考】**
 
 ```
-kubeadm join 192.168.0.51:6443 --token yu1ak0.2dcecvmpozsy8loh \
-    --discovery-token-ca-cert-hash sha256:5c4a69b3bb05b81b675db5559b0e4d7972f1d0a61195f217161522f464c307b0
+kubeadm join 192.168.1.51:6443 --token nygr6b.jm5imbmycc4upkf8 \
+    --discovery-token-ca-cert-hash sha256:161fad728e919c240ba4f6c80ed6e90363b5dba1ff0d404d259c9d608c9d48be
 ```
 
 > (1)在woker01和worker02上执行上述命令

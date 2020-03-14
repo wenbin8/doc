@@ -103,19 +103,19 @@ public class SayHelloServiceImpl implements SayHelloService {
 
 ### Dubbo负载均衡算法
 
-#### RandomLoadBalance
+#### RandomLoadBalance 权重随机算法
 
 权重随机算法，根据权重值进行随机负载。
 
 它的算法思想很简单。假设我们有一组服务器 servers=[A,B,C]，它们对应的权重为weights=[5,3,2]，权重总和为10。现在把这些权重值平铺在一位坐标值上，[0,5)区间属于服务器A，[5,8)区间舒服服务器B，[8,10）区间属于服务器C。接下来通过随机数生成器生成一个范围在[0,10)之间的随机数，然后计算这个随机数会落到那个区间上。比如数字3会落到服务器A对应的区间上，此时返回服务器A即可。权重越大的机器，在坐标轴上对应的区间范围就越大，因此随机数生成器生成的数据就会有更大的概率躲到此区间内。只要随机数生成器产生的随机数分布性很好，在经过多次选择后，每个服务器被选中的次数比例接近其权重比例。
 
-#### LeastActiveLoadBalance
+#### LeastActiveLoadBalance 最少活跃调用数算法
 
 最少活跃调用数算法，活跃调用数越小，表明服务提供者效率越高，单位时间内可处理更多的请求这个是比较科学的负载均衡算法。
 
 每个服务提供者对应一个活跃数active。初始情况下，所有服务提供者活跃数均为0.没收到一个请求，活跃数加1，完成请求或则将活跃数减1.在服务运行一段时间后，性能好的服务提供者处理请求的速度更快，因此活跃数下降也越快，此时这样的服务提供者能够优先获取到新的服务请求。
 
-#### ConsistentHashLoadBalance
+#### ConsistentHashLoadBalance hash一致性算法
 
 hash一致性算法，相同参数的请求总是发到统一提供者。
 
@@ -123,7 +123,7 @@ hash一致性算法，相同参数的请求总是发到统一提供者。
 
 一致性hash算法原理参考博客： https://www.jianshu.com/p/e968c081f563
 
-#### RoundRobinLoadBalance
+#### RoundRobinLoadBalance 加权轮询算法
 
 加权轮询算法
 
@@ -139,7 +139,7 @@ hash一致性算法，相同参数的请求总是发到统一提供者。
 @Service(loadbalance = "random", cluster = "failsafe")
 ```
 
-### Failover Cluster
+### Failover Cluster 失败自动切换
 
 失败自动切换，当出现失败，重试其他服务器。（缺省）
 
@@ -147,25 +147,25 @@ hash一致性算法，相同参数的请求总是发到统一提供者。
 
 可通过retries="2"来设置重试次数（不含第一次）。
 
-### Failfast Cluster
+### Failfast Cluster 快速失败
 
 快速失败，值发起一次调用，失败立即报错。
 
 通常用于非幂等性的写操作，比如新增记录。
 
-### Failsafe Cluster
+### Failsafe Cluster 失败安全
 
 失败安全，出现异常时，直接忽略。
 
 通常用于写入审计日志等操作。
 
-### Failback Cluster
+### Failback Cluster 失败自动回复
 
 失败自动回复，后台记录失败请求，定时重发。
 
 通常用于消息通知操作。
 
-### Forking Cluster
+### Forking Cluster 并行调用多个服务器
 
 并行调用多个服务器，只要一个返回成功即返回。
 
@@ -173,7 +173,7 @@ hash一致性算法，相同参数的请求总是发到统一提供者。
 
 可通过forks="2"来设置最大并行数。
 
-### Broadcast Cluster
+### Broadcast Cluster 广播调用所有提供者
 
 广播调用所有提供者，逐个调用，任意一台报错则报错。（2.1.0开始支持）
 

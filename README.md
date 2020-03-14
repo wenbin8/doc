@@ -224,6 +224,18 @@ Mycat
 - [x] [Kubernetes日志与监控](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/09-Kubernetes日志与监控.md)
 - [x] [Kubernetes Trouble Shooting](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/10-Kubernetes%20Trouble%20Shooting.md)
 
+###### 源码分析
+
+在能独立搭建k8s环境，和熟悉基本用，学习完go语言后，开始研究k8s是怎么实现的。这里先研究kube-scheduler是因为比较好奇k8s是如何实现调度。
+
+- [ ] Kubernetes-源码调试
+- [ ] kube-scheduler-node预选-源码分析
+- [ ] kube-scheduler-node优选-源码分析
+- [ ] kube-scheduler-抢占调度-源码分析
+- [ ] kube-scheduler-调度器初始化-源码分析
+- [ ] kube-scheduler-亲和性调度-源码分析
+
+
 ##### Service Mesh
 
 - [ ] istio基础及安装部署
