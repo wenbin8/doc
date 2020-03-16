@@ -883,3 +883,56 @@ checkNode := func(i int) {
 下面这半段代码，主要就是判断是否寻找够了需要的node数量。如果数量够了就结束预选。
 
 到这里真个预选过程就分析完了。
+
+#### 预选函数
+
+上面的源码分析，已知预选函数存放在`predicateFuncs`这个map中（如何在家的在初始化的时候分析），那么这个map中存放了哪些预选函数呢？ 我们通过断点看一下：
+
+![image-20200316183309604](assets/image-20200316183309604.png)
+
+内容如下：
+
+![image-20200316183424567](assets/image-20200316183424567.png)
+
+上图中可以看到`predicateFuncs`中只有10个过滤函数。而`predicates.Ordering()`中的key则远超10个，如代码：
+
+```go
+var (
+	//重要提示:此列表包含predicates的顺序，如果您开发了一个新的predicates，则必须将其名称添加到此列表中。
+	predicatesOrdering = []string{CheckNodeConditionPred, CheckNodeUnschedulablePred,
+		GeneralPred, HostNamePred, PodFitsHostPortsPred,
+		MatchNodeSelectorPred, PodFitsResourcesPred, NoDiskConflictPred,
+		PodToleratesNodeTaintsPred, PodToleratesNodeNoExecuteTaintsPred, CheckNodeLabelPresencePred,
+		CheckServiceAffinityPred, MaxEBSVolumeCountPred, MaxGCEPDVolumeCountPred, MaxCSIVolumeCountPred,
+		MaxAzureDiskVolumeCountPred, MaxCinderVolumeCountPred, CheckVolumeBindingPred, NoVolumeZoneConflictPred,
+		CheckNodeMemoryPressurePred, CheckNodePIDPressurePred, CheckNodeDiskPressurePred, MatchInterPodAffinityPred}
+)
+```
+
+从而验证了`predicates.Ordering()`是一个穷举的全量算法集合。而实际用的过函数则取决于是否在`predicateFuncs`中存在。
+
+`predicateFuncs`如何初始化的在初始换的时候详细分析这里不在展开。
+
+这里还有一个问题，就是这些函数到底都起到了什么作用，也不展开，不过可以参考官网：https://github.com/kubernetes/community/blob/master/contributors/design-proposals/scheduling/predicates-ordering.md
+
+#### 预选结果
+
+最后我们把断点打到预选结束的地方，看看预选完成后得到的结果。
+
+断点如下图：
+
+![image-20200316181600140](assets/image-20200316181600140.png)
+
+filteredNodes的结果：
+
+![image-20200316181648630](assets/image-20200316181648630.png)
+
+从上图可以看到两个work节点都通过了预选。
+
+下图是failedPredicateMap，可以看到master节点。没有通过预选，`Predicate PodToleratesNodeTaints failed`是没有通过预选的信息
+
+![image-20200316181737806](assets/image-20200316181737806.png)
+
+放过断点，通过命令`kubectl get pod -o wide`，可以看到pod已经被调度到响应的node上。
+
+![image-20200316182109809](assets/image-20200316182109809.png)
