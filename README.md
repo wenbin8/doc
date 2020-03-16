@@ -229,7 +229,7 @@ Mycat
 在能独立搭建k8s环境，和熟悉基本用，学习完go语言后，开始研究k8s是怎么实现的。这里先研究kube-scheduler是因为比较好奇k8s是如何实现pod的调度。
 
 - [x] [Kubernetes-源码调试](https://github.com/wenbin8/doc/blob/master/%E5%88%86%E5%B8%83%E5%BC%8F/CloudNative/Kubernetes/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/01-Kubernetes-%E6%BA%90%E7%A0%81%E8%B0%83%E8%AF%95.md)
-- [ ] kube-scheduler-node预选-源码分析
+- [x] [kube-scheduler-node预选-源码分析](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/源码分析/02-kube-scheduler-node预选-源码分析.md)
 - [ ] kube-scheduler-node优选-源码分析
 - [ ] kube-scheduler-抢占调度-源码分析
 - [ ] kube-scheduler-调度器初始化-源码分析
