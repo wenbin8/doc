@@ -488,7 +488,53 @@ if len(errs) != 0 {
 
 ![image-20200317140157993](assets/image-20200317140157993.png)
 
-### Fun和Map-Reduce实例分析
+### 选定节点
+
+分析完Node的优选后，在`pkg/scheduler/core/generic_scheduler.go`的`Schedule`函数中就只剩下`selectHost`这个函数还没分析了。这个函数在优选结束后，获取分值最高的node并返回。
+
+源码如下：
+
+```go
+func (g *genericScheduler) selectHost(priorityList schedulerapi.HostPriorityList) (string, error) {
+   if len(priorityList) == 0 {
+      return "", fmt.Errorf("empty priorityList")
+   }
+
+   // 从方法名不难看出找出最大分值。
+   // 这会返回“priorityList”中“得分”最高的节点的索引列表。
+   maxScores := findMaxScores(priorityList)
+   ix := int(g.lastNodeIndex % uint64(len(maxScores)))
+   g.lastNodeIndex++
+
+   // 返回最终确定的node
+   return priorityList[maxScores[ix]].Host, nil
+}
+
+func findMaxScores(priorityList schedulerapi.HostPriorityList) []int {
+	// 声明一个切片
+	maxScoreIndexes := make([]int, 0, len(priorityList)/2)
+	// 取到优选结果的第一个节点的分值作为当前最大分值
+	maxScore := priorityList[0].Score
+	for i, hp := range priorityList {
+		// 如果节点的分值大于当前最大分值
+		if hp.Score > maxScore {
+			maxScore = hp.Score		// 重新复制最大分值
+			maxScoreIndexes = maxScoreIndexes[:0]	// 相当于切片内的数据清空了。
+			maxScoreIndexes = append(maxScoreIndexes, i)	// 将当前节点的所以放入切片
+		} else if hp.Score == maxScore {	// 如果节点的分值等于最大分值，怎添加到切片中
+			maxScoreIndexes = append(maxScoreIndexes, i)
+		}
+	}
+	// 这里会返回一个可分配节点下标的集合
+	return maxScoreIndexes
+}
+```
+
+上面的两个函数结合下图，不太难理解。
+
+![image-20200317173737353](assets/image-20200317173737353.png)
+
+### Fun和Map-Reduce分析
 
 #### Fun
 
