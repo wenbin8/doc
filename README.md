@@ -231,8 +231,8 @@ Mycat
 - [x] [Kubernetes-源码调试](https://github.com/wenbin8/doc/blob/master/%E5%88%86%E5%B8%83%E5%BC%8F/CloudNative/Kubernetes/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/01-Kubernetes-%E6%BA%90%E7%A0%81%E8%B0%83%E8%AF%95.md)
 - [x] [kube-scheduler-node预选-源码分析](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/源码分析/02-kube-scheduler-node预选-源码分析.md)
 - [x] [kube-scheduler-node优选-源码分析](https://github.com/wenbin8/doc/blob/master/分布式/CloudNative/Kubernetes/源码分析/03-kube-scheduler-node优选-源码分析.md)
+- [x] kube-scheduler-调度器初始化-源码分析
 - [ ] kube-scheduler-抢占调度-源码分析
-- [ ] kube-scheduler-调度器初始化-源码分析
 - [ ] kube-scheduler-亲和性调度-源码分析
 
 
